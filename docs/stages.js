@@ -42,6 +42,18 @@ window.createStageController = function createStageController(stageId) {
   }
 
   if (stageId === "forge") {
+    const loadImg = (src) => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    };
+    const imgs = {
+      bg: loadImg("assets/forge_bg.png?v=3"),
+      master: loadImg("assets/master.png?v=3"),
+      player: loadImg("assets/player.png?v=3"),
+      anvil: loadImg("assets/anvil.png?v=3"),
+    };
+
     const state = {
       masterSwing: 0,
       masterWindup: 0,
@@ -285,165 +297,98 @@ window.createStageController = function createStageController(stageId) {
 
         const sx = (Math.random() * 2 - 1) * state.shake;
         const sy = (Math.random() * 2 - 1) * state.shake;
-        // Flat vibrant Rhythm Heaven warm background
-        ctx.fillStyle = `rgb(${44 + beatPulse * 14}, ${24 + beatPulse * 8}, ${22 + beatPulse * 6})`;
+
+        ctx.fillStyle = "#1c1414";
         ctx.fillRect(0, 0, 960, 540);
 
         ctx.save();
         ctx.translate(sx, sy);
 
+        // 1. Illustrated Forge Background
+        if (imgs.bg.complete && imgs.bg.naturalWidth > 0) {
+          ctx.drawImage(imgs.bg, 0, 0, 960, 540);
+        }
+        // Subtle warm beat-pulse furnace glow overlay
+        if (beatPulse > 0.02) {
+          ctx.fillStyle = `rgba(255, 140, 40, ${beatPulse * 0.14})`;
+          ctx.fillRect(0, 0, 960, 540);
+        }
+
         // Universal Beat Bop factor
-        const bopX = 1 + beatPulse * 0.08;
-        const bopY = 1 - beatPulse * 0.08;
+        const bopX = 1 + beatPulse * 0.07;
+        const bopY = 1 - beatPulse * 0.07;
 
-        // Furnace (with bold black ink outline)
-        ctx.save();
-        ctx.translate(480, 345);
-        ctx.scale(bopX, bopY);
-        ctx.fillStyle = "rgba(255, 130, 40, 0.20)";
-        ctx.beginPath();
-        ctx.arc(0, -85, 135, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "#594040";
-        ctx.strokeStyle = "#111116";
-        ctx.lineWidth = 4.5;
-        ctx.fillRect(-78, -170, 156, 170);
-        ctx.strokeRect(-78, -170, 156, 170);
-
-        ctx.fillStyle = "#ff8a24";
-        ctx.beginPath();
-        ctx.arc(0, -80, 48, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        // Floor
-        ctx.fillStyle = "#362826";
-        ctx.fillRect(0, 368, 960, 172);
-        ctx.strokeStyle = "#111116";
-        ctx.lineWidth = 4.5;
-        ctx.beginPath();
-        ctx.moveTo(0, 368);
-        ctx.lineTo(960, 368);
-        ctx.stroke();
-
-        const drawAnvil = (x, y) => {
+        const drawSprite = (img, x, y, scaleX, scaleY, rot = 0) => {
+          if (!img.complete || img.naturalWidth === 0) return;
           ctx.save();
           ctx.translate(x, y);
-          ctx.scale(bopX, bopY);
-          ctx.strokeStyle = "#111116";
-          ctx.lineWidth = 4.5;
-          ctx.fillStyle = "#677282";
-          ctx.fillRect(-40, -28, 80, 22);
-          ctx.strokeRect(-40, -28, 80, 22);
-          ctx.fillStyle = "#48505c";
-          ctx.fillRect(-20, -6, 40, 24);
-          ctx.strokeRect(-20, -6, 40, 24);
+          ctx.rotate(rot);
+          ctx.scale(scaleX, scaleY);
+          ctx.drawImage(img, -img.width * 0.5, -img.height);
           ctx.restore();
         };
 
-        const drawSmith = (x, y, swing, windup, shirt, dir, mood) => {
-          ctx.save();
-          ctx.translate(x, y);
-          const sSwing = swing > 0 ? swing : 0;
-          const w = 52 * bopX * (1 + sSwing * 0.16);
-          const h = 72 * bopY * (1 - sSwing * 0.16);
-
-          ctx.strokeStyle = "#111116";
-          ctx.lineWidth = 4.5;
-
-          // Body
-          ctx.fillStyle = shirt;
-          ctx.fillRect(-w / 2, -h, w, h);
-          ctx.strokeRect(-w / 2, -h, w, h);
-
-          // Head
-          const hy = -h - 24;
-          ctx.fillStyle = "#ffd9bd";
+        // Ground contact shadows
+        ctx.fillStyle = "rgba(0, 0, 0, 0.32)";
+        for (const [cx, cy, rx] of [[190, 435, 72], [325, 435, 58], [635, 435, 58], [765, 435, 68]]) {
           ctx.beginPath();
-          ctx.arc(0, hy, 23, 0, Math.PI * 2);
+          ctx.ellipse(cx, cy, rx, 14, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 2. Anvils (Left = Master, Right = Player)
+        drawSprite(imgs.anvil, 325, 438, bopX, bopY, 0);
+        drawSprite(imgs.anvil, 635, 438, bopX, bopY, 0);
+
+        // 3. Master Blacksmith (Left) with Windup/Swing animation
+        const mRot = state.masterWindup > 0 ? -0.14 * state.masterWindup : 0.16 * state.masterSwing;
+        const mScaleX = bopX * (1 + state.masterSwing * 0.10);
+        const mScaleY = bopY * (1 - state.masterSwing * 0.09);
+        drawSprite(imgs.master, 195, 438, mScaleX, mScaleY, mRot);
+
+        // Master Reaction Bubble (Ace / Barely / Miss Side-Eye!)
+        if (state.masterMood !== "normal") {
+          ctx.save();
+          ctx.translate(215, 165);
+          ctx.fillStyle = state.masterMood === "sideeye" ? "#ff5252" : state.masterMood === "confused" ? "#ffb84d" : "#ffe84d";
+          ctx.strokeStyle = "#111116";
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.roundRect(-52, -24, 104, 40, 12);
           ctx.fill();
           ctx.stroke();
-
-          // Ko Takeuchi expressive eyes & brows!
           ctx.fillStyle = "#111116";
-          if (mood === "sideeye") {
-            // Iconic Side-Eye Glare!
-            ctx.beginPath();
-            ctx.arc(8, hy - 3, 3.6, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(-8, hy - 9);
-            ctx.lineTo(14, hy - 9);
-            ctx.stroke();
-          } else if (mood === "happy") {
-            ctx.beginPath();
-            ctx.arc(dir * 7, hy - 4, 4, Math.PI, 0);
-            ctx.stroke();
-          } else if (mood === "confused") {
-            ctx.beginPath();
-            ctx.moveTo(dir * 2, hy - 5);
-            ctx.lineTo(dir * 12, hy - 5);
-            ctx.stroke();
-          } else {
-            ctx.beginPath();
-            ctx.arc(dir * 7, hy - 4, 3.6, 0, Math.PI * 2);
-            ctx.fill();
-          }
-
-          // Hammer Arm
-          const baseAng = windup > 0 ? -1.65 * dir : -1.05 * dir;
-          const ang = baseAng + 1.45 * dir * sSwing;
-          const sx0 = dir * 6;
-          const sy0 = -h * 0.7;
-          const hx = sx0 + Math.cos(ang) * 52 * dir;
-          const hy2 = sy0 + Math.sin(ang) * 52 * dir;
-
-          ctx.strokeStyle = "#111116";
-          ctx.lineWidth = 12;
-          ctx.beginPath();
-          ctx.moveTo(sx0, sy0);
-          ctx.lineTo(hx, hy2);
-          ctx.stroke();
-          ctx.strokeStyle = "#ffd9bd";
-          ctx.lineWidth = 6.5;
-          ctx.stroke();
-
-          ctx.fillStyle = "#959dad";
-          ctx.strokeStyle = "#111116";
-          ctx.lineWidth = 4;
-          ctx.fillRect(hx - 14, hy2 - 11, 28, 22);
-          ctx.strokeRect(hx - 14, hy2 - 11, 28, 22);
-
+          ctx.font = "bold 18px sans-serif";
+          ctx.textAlign = "center";
+          const moodTxt = state.masterMood === "sideeye" ? "😒 漏拍!" : state.masterMood === "confused" ? "⁉️ 打歪?" : "👍 漂亮!";
+          ctx.fillText(moodTxt, 0, 3);
           ctx.restore();
-        };
+        }
 
-        // Master (Left) & Player (Right)
-        drawAnvil(335, 355);
-        drawSmith(245, 368, state.masterSwing, state.masterWindup, "#ff683b", 1, state.masterMood);
+        // 4. Player Apprentice (Right) with Swing animation
+        const pRot = -0.18 * state.playerSwing;
+        const pScaleX = bopX * (1 + state.playerSwing * 0.11);
+        const pScaleY = bopY * (1 - state.playerSwing * 0.09);
+        drawSprite(imgs.player, 765, 438, pScaleX, pScaleY, pRot);
 
-        drawAnvil(615, 355);
-        drawSmith(710, 368, state.playerSwing, 0, "#3db8ff", -1, "normal");
-
-        // Ingot on Player Anvil
+        // 5. Ingot on Player Anvil
         ctx.strokeStyle = "#111116";
         ctx.lineWidth = 3.5;
         if (state.ingotState === "flat") {
           ctx.fillStyle = "#c95b38";
-          ctx.fillRect(584, 322, 62, 6);
-          ctx.strokeRect(584, 322, 62, 6);
+          ctx.fillRect(602, 326, 66, 7);
+          ctx.strokeRect(602, 326, 66, 7);
         } else if (state.ingotState === "miss") {
           ctx.fillStyle = "#5c575c";
-          ctx.fillRect(598, 344, 34, 10);
-          ctx.strokeRect(598, 344, 34, 10);
+          ctx.fillRect(618, 344, 34, 10);
+          ctx.strokeRect(618, 344, 34, 10);
         } else {
           ctx.fillStyle = state.ingotHeat > 0.6 ? "#fff078" : "#ff6b2b";
-          ctx.fillRect(590, 315, 50, 14);
-          ctx.strokeRect(590, 315, 50, 14);
+          ctx.fillRect(608, 318, 54, 15);
+          ctx.strokeRect(608, 318, 54, 15);
         }
 
-        // Flying Forged Swords
+        // 6. Flying Forged Swords
         for (const sw of state.flyingSwords) {
           ctx.save();
           ctx.translate(sw.x, sw.y);
@@ -459,7 +404,7 @@ window.createStageController = function createStageController(stageId) {
           ctx.restore();
         }
 
-        // Sparks & 4-Point Comic Stars
+        // 7. Sparks & 4-Point Comic Stars
         for (const sp of state.sparks) {
           const a = Math.max(0, sp.life / 0.45);
           ctx.fillStyle = sp.gold ? `rgba(255, 224, 66, ${a})` : `rgba(255, 160, 80, ${a})`;
@@ -491,29 +436,29 @@ window.createStageController = function createStageController(stageId) {
           ctx.restore();
         }
 
-        // Comic Radial Speed Lines on Ace Hit!
+        // 8. Comic Radial Speed Lines on Ace Hit!
         if (state.speedLines > 0.05) {
           ctx.save();
-          ctx.strokeStyle = `rgba(255, 240, 140, ${state.speedLines * 0.55})`;
-          ctx.lineWidth = 3;
+          ctx.strokeStyle = `rgba(255, 240, 140, ${state.speedLines * 0.65})`;
+          ctx.lineWidth = 3.5;
           for (let i = 0; i < 12; i++) {
             const a = (Math.PI * 2 * i) / 12 + 0.15;
             ctx.beginPath();
-            ctx.moveTo(615 + Math.cos(a) * 55, 320 + Math.sin(a) * 55);
-            ctx.lineTo(615 + Math.cos(a) * 155, 320 + Math.sin(a) * 155);
+            ctx.moveTo(635 + Math.cos(a) * 55, 325 + Math.sin(a) * 55);
+            ctx.lineTo(635 + Math.cos(a) * 165, 325 + Math.sin(a) * 165);
             ctx.stroke();
           }
           ctx.restore();
         }
 
-        // Blackout Smoke Cloud (Visual Occlusion Gag!)
+        // 9. Blackout Smoke Cloud
         if (state.smokeAlpha > 0.02) {
           ctx.save();
           ctx.globalAlpha = state.smokeAlpha * 0.96;
           ctx.fillStyle = "#2b2c38";
           ctx.strokeStyle = "#111116";
           ctx.lineWidth = 4;
-          const puffs = [[260, 290, 95], [380, 270, 110], [500, 295, 115], [620, 280, 110], [720, 305, 95]];
+          const puffs = [[240, 290, 105], [380, 270, 115], [500, 295, 120], [630, 280, 115], [750, 305, 105]];
           for (const [px, py, pr] of puffs) {
             ctx.beginPath();
             ctx.arc(px, py, pr, 0, Math.PI * 2);
@@ -529,14 +474,28 @@ window.createStageController = function createStageController(stageId) {
 
         ctx.restore();
 
+        // Top Banner Pill
+        ctx.save();
+        ctx.fillStyle = "rgba(17, 17, 22, 0.72)";
+        ctx.strokeStyle = "#ffd84d";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(230, 56, 500, 46, 14);
+        ctx.fill();
+        ctx.stroke();
         ctx.fillStyle = "#fff2d6";
-        ctx.font = "bold 24px sans-serif";
+        ctx.font = "bold 22px sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText(state.banner, 480, 115);
+        ctx.fillText(state.banner, 480, 86);
+        ctx.restore();
+
         ctx.fillStyle = "#ffdc5c";
-        ctx.font = "bold 20px sans-serif";
+        ctx.strokeStyle = "#111116";
+        ctx.lineWidth = 4;
+        ctx.font = "bold 22px sans-serif";
         ctx.textAlign = "left";
-        ctx.fillText(`成品神兵: ${state.swords}`, 30, 470);
+        ctx.strokeText(`成品神兵: ${state.swords}`, 28, 508);
+        ctx.fillText(`成品神兵: ${state.swords}`, 28, 508);
       },
     };
   }
