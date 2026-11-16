@@ -499,6 +499,21 @@ def build_sfx():
         mono = (l + r) * 0.5
         write_both(f"chord_{i}.wav", mono)
 
+    # 7. Comedic BONK + Sizzle (on Miss) & Bulb Snap Spark
+    n_bk = int(0.32 * SR)
+    tbk = np.arange(n_bk, dtype=np.float64) / SR
+    bonk_f = 280.0 + 190.0 * np.sin(2 * np.pi * 12.0 * tbk) * np.exp(-tbk * 10.0)
+    bonk = np.sin(np.cumsum(2 * np.pi * bonk_f / SR)) * np.exp(-tbk * 9.0) * 0.75
+    sizzle = rng.uniform(-1.0, 1.0, n_bk)
+    sizzle = (sizzle - np.concatenate(([0.0], sizzle[:-1])) * 0.85) * np.exp(-tbk * 7.0) * 0.35
+    write_both("sfx_bonk.wav", np.tanh((bonk + sizzle) * 1.2))
+
+    n_bs = int(0.28 * SR)
+    tbs = np.arange(n_bs, dtype=np.float64) / SR
+    pop = np.sin(np.cumsum(2 * np.pi * (950.0 * np.exp(-tbs * 25.0) + 90.0) / SR)) * np.exp(-tbs * 18.0) * 0.7
+    zap = (rng.uniform(-1.0, 1.0, n_bs) * (np.sin(2 * np.pi * 60.0 * tbs) > 0)) * np.exp(-tbs * 11.0) * 0.5
+    write_both("sfx_bulb_snap.wav", np.tanh((pop + zap) * 1.3))
+
 
 if __name__ == "__main__":
     chart = build_chart()

@@ -4,10 +4,13 @@ const PERFECT_WIN := 0.052
 const GOOD_WIN := 0.110
 const MISS_WIN := 0.135
 
-const LEFT_ANVIL_POS := Vector2(375, 534)
-const RIGHT_ANVIL_POS := Vector2(905, 534)
-const SPAWN_POS := Vector2(375, 470)
-const LAND_POS := Vector2(905, 470)
+const LEFT_ANVIL := Vector2(385, 505)
+const RIGHT_ANVIL := Vector2(885, 505)
+const SPAWN_POS := Vector2(385, 466)
+const LAND_POS := Vector2(885, 466)
+const BARREL_POS := Vector2(1170, 560)
+const MASTER_FOOT := Vector2(210, 615)
+const PLAYER_FOOT := Vector2(1040, 615)
 
 var _conductor: RhythmConductor
 var _cues: Array = []
@@ -15,48 +18,23 @@ var _targets: Array = []
 var _total_beats: float = 144.0
 var _bpm: float = 120.0
 
-# Preloaded Audio
+# Audio
 var _cue_hits: Array[AudioStream] = []
 var _cue_lob: AudioStream
 var _sfx_ace: AudioStream
 var _sfx_heavy: AudioStream
 var _sfx_barely: AudioStream
 var _sfx_miss: AudioStream
-var _sfx_power_off: AudioStream
+var _sfx_bonk: AudioStream
+var _sfx_bulb_snap: AudioStream
 var _sfx_power_on: AudioStream
 var _sfx_sword_fly: AudioStream
 var _chords: Array[AudioStream] = []
 
-# Preloaded Textures
-var _tex_master_windup: Texture2D
-var _tex_master_strike: Texture2D
-var _tex_master_windup_sil: Texture2D
-var _tex_master_strike_sil: Texture2D
-var _tex_player_ready: Texture2D
-var _tex_player_ready_sil: Texture2D
-var _tex_ingot_normal: Texture2D
-var _tex_ingot_heavy: Texture2D
-var _tex_sword: Texture2D
-
-# Scene Nodes
+# Nodes
 var _camera: Camera2D
-var _furnace_glow: ColorRect
-var _blackout_rect: ColorRect
-var _left_stump: Sprite2D
-var _left_anvil: Sprite2D
-var _right_stump: Sprite2D
-var _right_anvil: Sprite2D
-var _anvil_shader: ShaderMaterial
-var _master_spr: Sprite2D
-var _player_spr: Sprite2D
-var _master_smear: Sprite2D
-var _player_smear: Sprite2D
-var _props_layer: Node2D
+var _world_canvas: Node2D
 var _sparks: CPUParticles2D
-var _mood_bubble: PanelContainer
-var _mood_label: Label
-
-# HUD & Result
 var _hud_layer: CanvasLayer
 var _progress_bar: ProgressBar
 var _combo_label: Label
@@ -69,17 +47,31 @@ var _result_rank: Label
 var _result_headline: Label
 var _result_stats: Label
 
-# Runtime State
+# Animation & Comedy Physics State
+var _time_sec: float = 0.0
 var _beat_pulse: float = 0.0
 var _hitstop_timer: float = 0.0
 var _shake_trauma: float = 0.0
 var _anvil_flash: float = 0.0
-var _master_strike_timer: float = 0.0
-var _master_windup_timer: float = 0.0
-var _player_strike_timer: float = 0.0
+var _bellows_squeeze: float = 0.0
+
+var _master_strike_t: float = 0.0
+var _master_windup_t: float = 0.0
+var _player_strike_t: float = 0.0
+var _player_bonk_t: float = 0.0
+
+var _master_mood: String = "normal"
+var _player_mood: String = "normal"
 var _mood_timer: float = 0.0
+
 var _is_blackout: bool = false
 var _blackout_alpha: float = 0.0
+var _bulb_angle: float = 0.0
+var _bulb_vel: float = 0.0
+var _bulb_sparks: Array[Dictionary] = []
+
+var _barrel_wobble: float = 0.0
+var _barrel_weapons: Array[Dictionary] = []
 
 var _perfect_count: int = 0
 var _good_count: int = 0
@@ -90,14 +82,14 @@ var _swords_forged: int = 0
 var _stage_finished: bool = false
 
 var _flying_ingots: Array[Dictionary] = []
-var _flying_swords: Array[Dictionary] = []
+var _flying_weapons: Array[Dictionary] = []
 var _scrap_ingots: Array[Dictionary] = []
 
 
 func _ready() -> void:
-	_load_assets()
+	_load_audio()
 	_load_chart()
-	_build_stage_visuals()
+	_build_visuals()
 	_build_hud()
 
 	_conductor = RhythmConductor.new()
@@ -107,7 +99,7 @@ func _ready() -> void:
 	_conductor.start()
 
 
-func _load_assets() -> void:
+func _load_audio() -> void:
 	_cue_hits = [
 		load("res://assets/audio/cue_hit_1.wav"),
 		load("res://assets/audio/cue_hit_2.wav"),
@@ -118,21 +110,12 @@ func _load_assets() -> void:
 	_sfx_heavy = load("res://assets/audio/sfx_hit_heavy.wav")
 	_sfx_barely = load("res://assets/audio/sfx_hit_barely.wav")
 	_sfx_miss = load("res://assets/audio/sfx_miss.wav")
-	_sfx_power_off = load("res://assets/audio/sfx_power_off.wav")
+	_sfx_bonk = load("res://assets/audio/sfx_bonk.wav")
+	_sfx_bulb_snap = load("res://assets/audio/sfx_bulb_snap.wav")
 	_sfx_power_on = load("res://assets/audio/sfx_power_on.wav")
 	_sfx_sword_fly = load("res://assets/audio/sfx_sword_fly.wav")
 	for i in range(8):
 		_chords.append(load("res://assets/audio/chord_%d.wav" % i))
-
-	_tex_master_windup = load("res://assets/textures/master_windup.png")
-	_tex_master_strike = load("res://assets/textures/master_strike.png")
-	_tex_master_windup_sil = load("res://assets/textures/master_windup_sil.png")
-	_tex_master_strike_sil = load("res://assets/textures/master_strike_sil.png")
-	_tex_player_ready = load("res://assets/textures/player_ready.png")
-	_tex_player_ready_sil = load("res://assets/textures/player_ready_sil.png")
-	_tex_ingot_normal = load("res://assets/textures/ingot_normal.png")
-	_tex_ingot_heavy = load("res://assets/textures/ingot_heavy.png")
-	_tex_sword = load("res://assets/textures/sword.png")
 
 
 func _load_chart() -> void:
@@ -148,99 +131,18 @@ func _load_chart() -> void:
 		t["judged"] = false
 
 
-func _build_stage_visuals() -> void:
+func _build_visuals() -> void:
 	_camera = Camera2D.new()
 	_camera.position = Vector2(640, 360)
 	add_child(_camera)
 
-	var bg := Sprite2D.new()
-	bg.texture = load("res://assets/textures/forge_bg.png")
-	bg.position = Vector2(640, 360)
-	add_child(bg)
-
-	_furnace_glow = ColorRect.new()
-	_furnace_glow.size = Vector2(1280, 720)
-	_furnace_glow.color = Color(1.0, 0.52, 0.14, 0.0)
-	_furnace_glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_furnace_glow)
-
-	_blackout_rect = ColorRect.new()
-	_blackout_rect.size = Vector2(1280, 720)
-	_blackout_rect.color = Color(0.03, 0.03, 0.06, 0.0)
-	_blackout_rect.z_index = 2
-	_blackout_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_blackout_rect)
-
-	var stump_tex: Texture2D = load("res://assets/textures/stump.png")
-	var anvil_tex: Texture2D = load("res://assets/textures/anvil.png")
-
-	_left_stump = Sprite2D.new()
-	_left_stump.texture = stump_tex
-	_left_stump.position = LEFT_ANVIL_POS + Vector2(0, 88)
-	_left_stump.z_index = 3
-	add_child(_left_stump)
-
-	_left_anvil = Sprite2D.new()
-	_left_anvil.texture = anvil_tex
-	_left_anvil.position = LEFT_ANVIL_POS
-	_left_anvil.z_index = 3
-	add_child(_left_anvil)
-
-	_right_stump = Sprite2D.new()
-	_right_stump.texture = stump_tex
-	_right_stump.position = RIGHT_ANVIL_POS + Vector2(0, 88)
-	_right_stump.z_index = 3
-	add_child(_right_stump)
-
-	_anvil_shader = ShaderMaterial.new()
-	_anvil_shader.shader = load("res://assets/shaders/hit_flash.gdshader")
-	_right_anvil = Sprite2D.new()
-	_right_anvil.texture = anvil_tex
-	_right_anvil.flip_h = true
-	_right_anvil.position = RIGHT_ANVIL_POS
-	_right_anvil.material = _anvil_shader
-	_right_anvil.z_index = 3
-	add_child(_right_anvil)
-
-	_master_spr = Sprite2D.new()
-	_master_spr.texture = _tex_master_windup
-	_master_spr.offset = Vector2(0, -172)
-	_master_spr.position = Vector2(185, 650)
-	_master_spr.z_index = 4
-	add_child(_master_spr)
-
-	_player_spr = Sprite2D.new()
-	_player_spr.texture = _tex_player_ready
-	_player_spr.offset = Vector2(0, -162)
-	_player_spr.position = Vector2(1095, 650)
-	_player_spr.z_index = 4
-	add_child(_player_spr)
-
-	var smear_tex: Texture2D = load("res://assets/textures/smear_arc.png")
-	_master_smear = Sprite2D.new()
-	_master_smear.texture = smear_tex
-	_master_smear.position = LEFT_ANVIL_POS + Vector2(-20, -60)
-	_master_smear.modulate.a = 0.0
-	_master_smear.z_index = 5
-	add_child(_master_smear)
-
-	_player_smear = Sprite2D.new()
-	_player_smear.texture = smear_tex
-	_player_smear.flip_h = true
-	_player_smear.position = RIGHT_ANVIL_POS + Vector2(20, -60)
-	_player_smear.modulate.a = 0.0
-	_player_smear.z_index = 5
-	add_child(_player_smear)
-
-	_props_layer = Node2D.new()
-	_props_layer.z_index = 5
-	_props_layer.draw.connect(_draw_props)
-	add_child(_props_layer)
+	_world_canvas = Node2D.new()
+	_world_canvas.draw.connect(_draw_world)
+	add_child(_world_canvas)
 
 	_sparks = CPUParticles2D.new()
 	_sparks.texture = load("res://assets/textures/spark.png")
 	_sparks.position = LAND_POS
-	_sparks.z_index = 6
 	_sparks.emitting = false
 	_sparks.one_shot = true
 	_sparks.explosiveness = 0.94
@@ -248,7 +150,7 @@ func _build_stage_visuals() -> void:
 	_sparks.lifetime = 0.45
 	_sparks.direction = Vector2(0, -1)
 	_sparks.spread = 85.0
-	_sparks.initial_velocity_min = 200.0
+	_sparks.initial_velocity_min = 210.0
 	_sparks.initial_velocity_max = 460.0
 	_sparks.gravity = Vector2(0, 780.0)
 	_sparks.scale_amount_min = 0.45
@@ -276,7 +178,7 @@ func _build_hud() -> void:
 	ui_root.add_child(top)
 
 	_practice_pill = PanelContainer.new()
-	UITheme.style_card(_practice_pill, Color(0.20, 0.62, 0.96, 0.92), Color(0.067, 0.067, 0.086))
+	UITheme.style_card(_practice_pill, Color(0.20, 0.62, 0.96, 0.92))
 	var pm := _practice_pill.get_theme_stylebox("panel").duplicate()
 	pm.set_content_margin_all(8)
 	pm.set_corner_radius_all(12)
@@ -309,20 +211,6 @@ func _build_hud() -> void:
 	UITheme.style_button(back_btn, Color(0.92, 0.93, 0.98))
 	back_btn.pressed.connect(_go_title)
 	top.add_child(back_btn)
-
-	# Master comic reaction bubble
-	_mood_bubble = PanelContainer.new()
-	_mood_bubble.position = Vector2(215, 225)
-	_mood_bubble.visible = false
-	UITheme.style_card(_mood_bubble, Color(1.0, 0.88, 0.28))
-	var mb_sb := _mood_bubble.get_theme_stylebox("panel").duplicate()
-	mb_sb.set_content_margin_all(8)
-	_mood_bubble.add_theme_stylebox_override("panel", mb_sb)
-	_mood_label = Label.new()
-	_mood_label.add_theme_font_size_override("font_size", 20)
-	_mood_label.modulate = Color(0.07, 0.07, 0.1)
-	_mood_bubble.add_child(_mood_label)
-	ui_root.add_child(_mood_bubble)
 
 	_judge_label = Label.new()
 	_judge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -408,6 +296,7 @@ func _build_hud() -> void:
 
 func _on_beat_hit(_beat_idx: int) -> void:
 	_beat_pulse = 1.0
+	_bellows_squeeze = 1.0
 
 
 func _process(delta: float) -> void:
@@ -418,17 +307,18 @@ func _process(delta: float) -> void:
 	if _stage_finished:
 		return
 
+	_time_sec += delta
 	_beat_pulse = maxf(0.0, _beat_pulse - delta * 5.2)
+	_bellows_squeeze = maxf(0.0, _bellows_squeeze - delta * 4.0)
+
 	var cur_beat := _conductor.current_beat
 	_progress_bar.value = clampf(cur_beat / maxf(1.0, _total_beats) * 100.0, 0.0, 100.0)
 
-	# Trigger cues
 	for c in _cues:
 		if not c["triggered"] and cur_beat >= float(c["beat"]):
 			c["triggered"] = true
 			_handle_cue(c)
 
-	# Auto-miss targets past MISS_WIN
 	var cur_sec := cur_beat * _conductor.beat_duration
 	for t in _targets:
 		if not t["judged"]:
@@ -437,12 +327,12 @@ func _process(delta: float) -> void:
 				t["judged"] = true
 				_register_miss(t)
 
-	_update_visuals(delta, cur_beat)
+	_update_physics(delta, cur_beat)
 
 	if cur_beat >= _total_beats:
 		_finish_stage()
 
-	_props_layer.queue_redraw()
+	_world_canvas.queue_redraw()
 
 
 func _handle_cue(c: Dictionary) -> void:
@@ -450,20 +340,17 @@ func _handle_cue(c: Dictionary) -> void:
 	if kind == "count_in":
 		_conductor.play_cue(_cue_hits[0], 0.10)
 	elif kind == "pass_normal":
-		_master_strike_timer = 0.16
-		_master_smear.modulate.a = 1.0
+		_master_strike_t = 1.0
 		_conductor.play_cue(_cue_hits[1], 0.14)
 		_spawn_flying_ingot(c, "normal")
 	elif kind == "pass_triple":
 		var step := clampi(int(c.get("step", 1)) - 1, 0, 2)
-		_master_strike_timer = 0.14
-		_master_smear.modulate.a = 1.0
+		_master_strike_t = 1.0
 		_conductor.play_cue(_cue_hits[step], 0.12)
 		_spawn_flying_ingot(c, "triple")
 	elif kind == "pass_heavy":
-		_master_windup_timer = 0.25
-		_master_strike_timer = 0.18
-		_master_smear.modulate.a = 1.0
+		_master_windup_t = 1.0
+		_master_strike_t = 1.0
 		_conductor.play_cue(_cue_lob, 0.35)
 		_spawn_flying_ingot(c, "heavy")
 	elif kind == "practice_done":
@@ -473,9 +360,17 @@ func _handle_cue(c: Dictionary) -> void:
 		tw.tween_property(_practice_pill, "modulate:a", 0.0, 0.35)
 	elif kind == "blackout_on":
 		_is_blackout = true
-		_conductor.play_sfx(_sfx_power_off, &"Master", -2.0)
+		_bulb_vel = 6.5
+		_conductor.play_sfx(_sfx_bulb_snap, &"Master", -1.0)
+		for i in range(10):
+			_bulb_sparks.append({
+				"pos": Vector2(640, 128),
+				"vel": Vector2(randf_range(-180, 180), randf_range(-80, 180)),
+				"life": 0.45,
+			})
 	elif kind == "blackout_off":
 		_is_blackout = false
+		_bulb_vel = -3.0
 		_conductor.play_sfx(_sfx_power_on, &"Master", -2.0)
 
 
@@ -502,6 +397,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		_handle_tap()
 
 
+func _pick_absurd_weapon(kind: String, heavy: bool) -> String:
+	if heavy:
+		return "excalibur" if _swords_forged % 2 == 0 else "pan"
+	if kind == "triple":
+		return "fish" if _combo >= 6 else "sword"
+	return "pan" if (_swords_forged % 5 == 4) else "sword"
+
+
 func _handle_tap() -> void:
 	var cur_sec := _conductor.current_beat * _conductor.beat_duration
 	var best_t: Dictionary = {}
@@ -515,8 +418,7 @@ func _handle_tap() -> void:
 			best_abs = abs_err
 			best_t = t
 
-	_player_strike_timer = 0.16
-	_player_smear.modulate.a = 1.0
+	_player_strike_t = 1.0
 
 	if best_t.is_empty():
 		_conductor.play_foley(_sfx_barely, -12.0, false)
@@ -524,9 +426,9 @@ func _handle_tap() -> void:
 
 	best_t["judged"] = true
 	var is_practice := bool(best_t.get("practice", false))
-	var heavy := str(best_t.get("kind", "")) == "heavy"
+	var kind := str(best_t.get("kind", "normal"))
+	var heavy := kind == "heavy"
 
-	# Resolve matching flying ingot
 	for fi in _flying_ingots:
 		if not fi["resolved"] and absf(float(fi["hit_beat"]) - float(best_t["beat"])) < 0.08:
 			fi["resolved"] = true
@@ -543,22 +445,25 @@ func _handle_tap() -> void:
 		var c_idx := clampi(int(best_t.get("chord_idx", 0)), 0, _chords.size() - 1)
 		_conductor.play_quantized_chord(_chords[c_idx], -3.0)
 
-		_hitstop_timer = 0.045
+		_hitstop_timer = 0.042
 		_shake_trauma = 0.85 if heavy else 0.55
 		_anvil_flash = 1.0
 		_sparks.restart()
-		_show_mood("👍 超赞!", Color(1.0, 0.88, 0.28))
+		_master_mood = "happy"
+		_player_mood = "happy"
+		_mood_timer = 0.65
 
 		if bool(best_t.get("finish_sword", false)):
 			if not is_practice:
 				_swords_forged += 1
 			_conductor.play_foley(_sfx_sword_fly, -4.0, false)
-			_flying_swords.append({
-				"pos": LAND_POS + Vector2(0, -16),
-				"vel": Vector2(260, -450),
-				"rot": -0.25,
+			var w_kind := _pick_absurd_weapon(kind, heavy)
+			_flying_weapons.append({
+				"start": LAND_POS,
+				"end": BARREL_POS + Vector2(randf_range(-16, 16), -42),
+				"t": 0.0,
+				"kind": w_kind,
 				"scale": 1.35 if heavy else 1.0,
-				"life": 1.1,
 			})
 	elif best_abs <= GOOD_WIN:
 		if not is_practice:
@@ -569,14 +474,15 @@ func _handle_tap() -> void:
 		_show_judge("不错 (练习)" if is_practice else "BARELY", Color(0.62, 0.92, 0.42))
 		_conductor.play_foley(_sfx_barely, -2.0, false)
 		_shake_trauma = 0.25
-		_show_mood("❓ 差点!", Color(1.0, 0.72, 0.30))
-		_scrap_ingots.append({
+		_master_mood = "sideeye"
+		_mood_timer = 0.55
+		_scrap_ingots.push_back({
 			"pos": LAND_POS,
-			"vel": Vector2(120, -180),
+			"vel": Vector2(140, -200),
 			"rot": 0.0,
-			"spin": 8.0,
+			"spin": 9.0,
 			"flat": true,
-			"life": 0.8,
+			"life": 0.85,
 		})
 	else:
 		_register_miss(best_t)
@@ -594,25 +500,12 @@ func _register_miss(t: Dictionary) -> void:
 	_combo = 0
 	_update_combo()
 	_show_judge("MISS", Color(0.96, 0.32, 0.36))
-	_conductor.play_foley(_sfx_miss, -2.0, false)
-	_show_mood("😒 喂...!", Color(1.0, 0.38, 0.42))
-	_scrap_ingots.append({
-		"pos": LAND_POS,
-		"vel": Vector2(70, 60),
-		"rot": 0.2,
-		"spin": 4.0,
-		"flat": false,
-		"life": 0.75,
-	})
-
-
-func _show_mood(text: String, bg: Color) -> void:
-	_mood_label.text = text
-	var sb := _mood_bubble.get_theme_stylebox("panel").duplicate()
-	sb.bg_color = bg
-	_mood_bubble.add_theme_stylebox_override("panel", sb)
-	_mood_bubble.visible = true
-	_mood_timer = 0.75
+	# Physical BONK on Apprentice head + Master & Fire Buddy side-eye glare!
+	_conductor.play_foley(_sfx_bonk, -1.0, false)
+	_player_bonk_t = 1.0
+	_master_mood = "sideeye"
+	_mood_timer = 1.1
+	_shake_trauma = 0.35
 
 
 func _update_combo() -> void:
@@ -636,69 +529,44 @@ func _show_judge(text: String, color: Color) -> void:
 	_judge_tween.tween_property(_judge_label, "modulate:a", 0.0, 0.14)
 
 
-func _update_visuals(delta: float, cur_beat: float) -> void:
-	_furnace_glow.color.a = _beat_pulse * 0.12
-	_blackout_alpha = lerpf(_blackout_alpha, 0.94 if _is_blackout else 0.0, minf(1.0, delta * 9.0))
-	_blackout_rect.color.a = _blackout_alpha
+func _update_physics(delta: float, cur_beat: float) -> void:
+	_blackout_alpha = lerpf(_blackout_alpha, 0.93 if _is_blackout else 0.0, minf(1.0, delta * 9.0))
+	_master_strike_t = maxf(0.0, _master_strike_t - delta * 6.0)
+	_master_windup_t = maxf(0.0, _master_windup_t - delta * 2.5)
+	_player_strike_t = maxf(0.0, _player_strike_t - delta * 6.2)
+	_player_bonk_t = maxf(0.0, _player_bonk_t - delta * 1.1)
+	_anvil_flash = maxf(0.0, _anvil_flash - delta * 8.0)
 
-	var sil := _blackout_alpha > 0.5
-	_master_strike_timer = maxf(0.0, _master_strike_timer - delta)
-	_master_windup_timer = maxf(0.0, _master_windup_timer - delta)
-	_player_strike_timer = maxf(0.0, _player_strike_timer - delta)
-	_master_smear.modulate.a = maxf(0.0, _master_smear.modulate.a - delta * 10.0)
-	_player_smear.modulate.a = maxf(0.0, _player_smear.modulate.a - delta * 10.0)
+	# Swinging bulb pendulum physics
+	_bulb_vel += (-18.0 * _bulb_angle - 1.4 * _bulb_vel) * delta
+	_bulb_angle += _bulb_vel * delta
+
+	# Barrel spring wobble
+	_barrel_wobble = lerpf(_barrel_wobble, 0.0, minf(1.0, delta * 9.0))
 
 	if _mood_timer > 0.0:
 		_mood_timer -= delta
 		if _mood_timer <= 0.0:
-			_mood_bubble.visible = false
-
-	# Beat Bop Squash & Stretch + Strike Kinematics
-	var bop_x := 1.0 + _beat_pulse * 0.06
-	var bop_y := 1.0 - _beat_pulse * 0.06
-	_left_anvil.scale = Vector2(bop_x, bop_y)
-	_right_anvil.scale = Vector2(bop_x, bop_y)
-	_left_stump.scale = Vector2(bop_x, bop_y)
-	_right_stump.scale = Vector2(bop_x, bop_y)
-
-	if _master_strike_timer > 0.0:
-		_master_spr.texture = _tex_master_strike_sil if sil else _tex_master_strike
-		_master_spr.scale = Vector2(1.08, 0.92)
-		_master_spr.rotation_degrees = 3.0
-	else:
-		_master_spr.texture = _tex_master_windup_sil if sil else _tex_master_windup
-		_master_spr.scale = Vector2(bop_x, bop_y)
-		_master_spr.rotation_degrees = -6.0 if _master_windup_timer > 0.0 else 0.0
-
-	_player_spr.texture = _tex_player_ready_sil if sil else _tex_player_ready
-	if _player_strike_timer > 0.0:
-		var p := _player_strike_timer / 0.16
-		_player_spr.rotation_degrees = lerpf(0.0, -18.0, p)
-		_player_spr.scale = Vector2(1.16, 0.86)
-	else:
-		_player_spr.rotation_degrees = 0.0
-		_player_spr.scale = Vector2(bop_x, bop_y)
-
-	_anvil_flash = maxf(0.0, _anvil_flash - delta * 8.0)
-	_anvil_shader.set_shader_parameter("flash_amount", _anvil_flash)
+			_master_mood = "normal"
+			_player_mood = "normal"
 
 	_shake_trauma = maxf(0.0, _shake_trauma - delta * 3.0)
 	var sh := _shake_trauma * _shake_trauma * 15.0
 	_camera.offset = Vector2(randf_range(-sh, sh), randf_range(-sh, sh))
 
-	# Prune finished flying ingots
 	for i in range(_flying_ingots.size() - 1, -1, -1):
 		if _flying_ingots[i]["resolved"] or cur_beat - float(_flying_ingots[i]["hit_beat"]) > 0.2:
 			_flying_ingots.remove_at(i)
 
-	for i in range(_flying_swords.size() - 1, -1, -1):
-		var sw := _flying_swords[i]
-		sw["life"] -= delta
-		sw["vel"].y += 780.0 * delta
-		sw["pos"] += sw["vel"] * delta
-		sw["rot"] += 5.2 * delta
-		if sw["life"] <= 0.0:
-			_flying_swords.remove_at(i)
+	for i in range(_flying_weapons.size() - 1, -1, -1):
+		var fw := _flying_weapons[i]
+		fw["t"] += delta * 2.8
+		if fw["t"] >= 1.0:
+			_barrel_wobble = 1.0
+			_barrel_weapons.append({"kind": fw["kind"], "rot": randf_range(-0.28, 0.28)})
+			if _barrel_weapons.size() > 14:
+				_barrel_weapons.pop_front()
+			_flying_weapons.remove_at(i)
 
 	for i in range(_scrap_ingots.size() - 1, -1, -1):
 		var sc := _scrap_ingots[i]
@@ -709,9 +577,54 @@ func _update_visuals(delta: float, cur_beat: float) -> void:
 		if sc["life"] <= 0.0:
 			_scrap_ingots.remove_at(i)
 
+	for i in range(_bulb_sparks.size() - 1, -1, -1):
+		var bs := _bulb_sparks[i]
+		bs["life"] -= delta
+		bs["vel"].y += 650.0 * delta
+		bs["pos"] += bs["vel"] * delta
+		if bs["life"] <= 0.0:
+			_bulb_sparks.remove_at(i)
 
-func _draw_props() -> void:
+
+func _compute_ingot_pos(fi: Dictionary, cur_beat: float) -> Vector2:
+	var sb := float(fi["spawn_beat"])
+	var hb := float(fi["hit_beat"])
+	var t := clampf((cur_beat - sb) / maxf(0.05, hb - sb), 0.0, 1.15)
+	var is_heavy := str(fi["kind"]) == "heavy"
+	var arc_h := 285.0 if is_heavy else 170.0
+	var pos := SPAWN_POS.lerp(LAND_POS, t)
+	pos.y -= 4.0 * arc_h * t * (1.0 - t)
+	return pos
+
+
+func _draw_world() -> void:
 	var cur_beat := _conductor.current_beat
+	var sil := _blackout_alpha > 0.5
+
+	# 1. Workshop background + Fire Buddy + Swinging Bulb
+	ForgePainter.draw_workshop_bg(_world_canvas, _beat_pulse, _time_sec, _master_mood, _bulb_angle, not _is_blackout, _bellows_squeeze)
+
+	# 2. Blackout curtain behind foreground characters/props
+	if _blackout_alpha > 0.01:
+		_world_canvas.draw_rect(Rect2(-40, -40, 1360, 800), Color(0.03, 0.03, 0.06, _blackout_alpha))
+
+	# 3. Anvils & Weapon Barrel
+	ForgePainter.draw_anvil_station(_world_canvas, LEFT_ANVIL, _beat_pulse, 0.0, false, sil)
+	ForgePainter.draw_anvil_station(_world_canvas, RIGHT_ANVIL, _beat_pulse, _anvil_flash, true, sil)
+	ForgePainter.draw_barrel(_world_canvas, BARREL_POS, _barrel_wobble, _barrel_weapons, sil)
+
+	# 4. Find nearest airborne ingot for real-time Apprentice eyeball tracking!
+	var track_pos := SPAWN_POS
+	for fi in _flying_ingots:
+		if not fi["resolved"] and not fi["blind"]:
+			track_pos = _compute_ingot_pos(fi, cur_beat)
+			break
+
+	# 5. Articulated 2-Bone Vector Characters
+	ForgePainter.draw_master(_world_canvas, MASTER_FOOT, _beat_pulse, _time_sec, _master_strike_t, _master_windup_t, _master_mood, sil)
+	ForgePainter.draw_player(_world_canvas, PLAYER_FOOT, _beat_pulse, _time_sec, _player_strike_t, _player_bonk_t, _player_mood, track_pos, sil)
+
+	# 6. Flying Molten Ingots (hidden when blind: true!)
 	for fi in _flying_ingots:
 		if fi["resolved"] or fi["blind"]:
 			continue
@@ -719,24 +632,30 @@ func _draw_props() -> void:
 		var hb := float(fi["hit_beat"])
 		var t := clampf((cur_beat - sb) / maxf(0.05, hb - sb), 0.0, 1.15)
 		var is_heavy := str(fi["kind"]) == "heavy"
-		var arc_h := 285.0 if is_heavy else 170.0
-		var pos := SPAWN_POS.lerp(LAND_POS, t)
-		pos.y -= 4.0 * arc_h * t * (1.0 - t)
+		var pos := _compute_ingot_pos(fi, cur_beat)
 		var rot := t * TAU * (1.5 if is_heavy else 1.0)
-		var tex: Texture2D = _tex_ingot_heavy if is_heavy else _tex_ingot_normal
-		_props_layer.draw_set_transform(pos, rot, Vector2.ONE)
-		_props_layer.draw_texture(tex, -tex.get_size() * 0.5)
+		_world_canvas.draw_set_transform(pos, rot, Vector2(1.4, 1.4) if is_heavy else Vector2.ONE)
+		_world_canvas.draw_circle(Vector2.ZERO, 26.0, Color(1.0, 0.45, 0.1, 0.35))
+		ForgePainter.draw_outlined_rect(_world_canvas, Rect2(-26, -11, 52, 22), Color(1.0, 0.44, 0.12), 4.0)
+		_world_canvas.draw_rect(Rect2(-18, -6, 36, 9), Color(1.0, 0.88, 0.35))
 
-	for sw in _flying_swords:
-		_props_layer.draw_set_transform(sw["pos"], sw["rot"], Vector2(sw["scale"], sw["scale"]))
-		_props_layer.draw_texture(_tex_sword, -_tex_sword.get_size() * 0.5)
+	# 7. Forged Absurd Weapons arcing into Barrel!
+	for fw in _flying_weapons:
+		var t := float(fw["t"])
+		var p: Vector2 = fw["start"].lerp(fw["end"], t)
+		p.y -= 4.0 * 180.0 * t * (1.0 - t)
+		_world_canvas.draw_set_transform(p, t * TAU * 1.5, Vector2(fw["scale"], fw["scale"]))
+		ForgePainter.draw_weapon_shape(_world_canvas, Vector2.ZERO, str(fw["kind"]), 1.0, false)
 
+	# 8. Crumpled Scrap Ingots on Barely
 	for sc in _scrap_ingots:
-		var s_vec := Vector2(1.25, 0.45) if sc["flat"] else Vector2(0.85, 0.85)
-		_props_layer.draw_set_transform(sc["pos"], sc["rot"], s_vec)
-		_props_layer.draw_texture(_tex_ingot_normal, -_tex_ingot_normal.get_size() * 0.5, Color(0.7, 0.6, 0.65, clampf(sc["life"] * 2.0, 0.0, 1.0)))
+		_world_canvas.draw_set_transform(sc["pos"], sc["rot"], Vector2(1.3, 0.45))
+		ForgePainter.draw_outlined_rect(_world_canvas, Rect2(-22, -9, 44, 18), Color(0.55, 0.42, 0.40), 3.5)
 
-	_props_layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	# 9. Bulb Snap Electric Sparks
+	_world_canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	for bs in _bulb_sparks:
+		_world_canvas.draw_circle(bs["pos"], 5.0 * bs["life"] * 2.0, Color(1.0, 0.94, 0.35))
 
 
 func _finish_stage() -> void:
@@ -750,16 +669,16 @@ func _finish_stage() -> void:
 	_result_rank.text = rank
 	if acc >= 85.0:
 		_result_rank.modulate = Color(1.0, 0.78, 0.14)
-		_result_headline.text = "“天才打铁匠横空出世！停电也能精准铸出名剑！”"
+		_result_headline.text = "“天才打铁匠横空出世！木桶都插满黄金平底锅与圣剑啦！”"
 	elif acc >= 60.0:
 		_result_rank.modulate = Color(0.28, 0.78, 0.40)
 		_result_headline.text = "“火候不错，再把三连快传和停电段稳住就是大师了！”"
 	else:
 		_result_rank.modulate = Color(0.92, 0.30, 0.34)
-		_result_headline.text = "“师傅看得直斜眼……多听木鱼与飞铁落地的节奏吧！”"
+		_result_headline.text = "“脑袋上被铁块砸出好几个大包……多听木鱼与风箱声吧！”"
 
 	var medal := "   ★获得完美奖章！" if (_miss_count == 0 and acc >= 95.0) else ""
-	_result_stats.text = "准确度：%.1f%%   神兵：%d 把%s\nACE: %d    BARELY: %d    MISS: %d\n最大连击：%d" % [
+	_result_stats.text = "准确度：%.1f%%   神兵入桶：%d 件%s\nACE: %d    BARELY: %d    MISS: %d\n最大连击：%d" % [
 		acc, _swords_forged, medal, _perfect_count, _good_count, _miss_count, _max_combo
 	]
 	_result_overlay.visible = true

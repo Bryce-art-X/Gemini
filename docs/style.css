@@ -39,10 +39,19 @@ html, body {
   padding: 18px;
 }
 
+.title-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
 .title-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(rgba(14, 10, 14, 0.56), rgba(14, 10, 14, 0.72)), url("assets/forge_bg.png?v=5") center/cover no-repeat;
+  background: rgba(14, 10, 14, 0.36);
   z-index: 0;
 }
 

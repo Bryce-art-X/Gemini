@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>铁匠传球！Forge Pass!</title>
-  <link rel="stylesheet" href="style.css?v=5" />
+  <link rel="stylesheet" href="style.css?v=6" />
 </head>
 <body>
   <div id="app">
     <!-- 标题封面 -->
     <section id="title-screen" class="screen active">
+      <canvas id="title-canvas" class="title-canvas" width="1280" height="720"></canvas>
       <div class="title-bg"></div>
       <div class="title-card">
         <div class="title-badge">RHYTHM FORGE • 120 BPM</div>
@@ -72,7 +73,8 @@
     </section>
   </div>
 
-  <script src="audio.js?v=5"></script>
-  <script src="app.js?v=5"></script>
+  <script src="painter.js?v=6"></script>
+  <script src="audio.js?v=6"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>

@@ -5,9 +5,7 @@ var _sfx_player: AudioStreamPlayer
 var _sfx_cue: AudioStreamWAV
 var _sfx_tap: AudioStreamWAV
 
-var _master_spr: Sprite2D
-var _player_spr: Sprite2D
-var _title_box: VBoxContainer
+var _stage_canvas: Node2D
 var _beat_pulse: float = 0.0
 var _last_beat: int = -1
 var _clock: float = 0.0
@@ -47,74 +45,36 @@ func _ready() -> void:
 
 
 func _build_scene() -> void:
-	var stage_layer := Node2D.new()
-	add_child(stage_layer)
-
-	var bg := Sprite2D.new()
-	bg.texture = load("res://assets/textures/forge_bg.png")
-	bg.position = Vector2(640, 360)
-	stage_layer.add_child(bg)
+	_stage_canvas = Node2D.new()
+	_stage_canvas.draw.connect(_draw_live_backdrop)
+	add_child(_stage_canvas)
 
 	var tint := ColorRect.new()
-	tint.size = Vector2(1280, 720)
-	tint.color = Color(0.06, 0.04, 0.05, 0.42)
+	tint.set_anchors_preset(Control.PRESET_FULL_RECT)
+	tint.color = Color(0.06, 0.04, 0.05, 0.35)
 	tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	stage_layer.add_child(tint)
+	add_child(tint)
 
-	var left_stump := Sprite2D.new()
-	left_stump.texture = load("res://assets/textures/stump.png")
-	left_stump.position = Vector2(360, 620)
-	stage_layer.add_child(left_stump)
-
-	var left_anvil := Sprite2D.new()
-	left_anvil.texture = load("res://assets/textures/anvil.png")
-	left_anvil.position = Vector2(360, 530)
-	stage_layer.add_child(left_anvil)
-
-	var right_stump := Sprite2D.new()
-	right_stump.texture = load("res://assets/textures/stump.png")
-	right_stump.position = Vector2(920, 620)
-	stage_layer.add_child(right_stump)
-
-	var right_anvil := Sprite2D.new()
-	right_anvil.texture = load("res://assets/textures/anvil.png")
-	right_anvil.position = Vector2(920, 530)
-	right_anvil.flip_h = true
-	stage_layer.add_child(right_anvil)
-
-	_master_spr = Sprite2D.new()
-	_master_spr.texture = load("res://assets/textures/master_windup.png")
-	_master_spr.offset = Vector2(0, -172)
-	_master_spr.position = Vector2(190, 650)
-	stage_layer.add_child(_master_spr)
-
-	_player_spr = Sprite2D.new()
-	_player_spr.texture = load("res://assets/textures/player_ready.png")
-	_player_spr.offset = Vector2(0, -162)
-	_player_spr.position = Vector2(1090, 650)
-	stage_layer.add_child(_player_spr)
-
-	# Foreground UI
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(620, 0)
-	UITheme.style_card(card, Color(0.14, 0.13, 0.20, 0.94), Color(1.0, 0.80, 0.26))
+	UITheme.style_card(card, Color(0.14, 0.13, 0.20, 0.92), Color(1.0, 0.80, 0.26))
 	center.add_child(card)
 
-	_title_box = VBoxContainer.new()
-	_title_box.add_theme_constant_override("separation", 14)
-	_title_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	card.add_child(_title_box)
+	var title_box := VBoxContainer.new()
+	title_box.add_theme_constant_override("separation", 14)
+	title_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	card.add_child(title_box)
 
 	var badge := Label.new()
 	badge.text = "RHYTHM FORGE • 120 BPM"
 	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	badge.add_theme_font_size_override("font_size", 16)
 	badge.modulate = Color(1.0, 0.82, 0.34)
-	_title_box.add_child(badge)
+	title_box.add_child(badge)
 
 	var title := Label.new()
 	title.text = "铁匠传球！"
@@ -122,14 +82,14 @@ func _build_scene() -> void:
 	title.add_theme_font_size_override("font_size", 56)
 	title.add_theme_color_override("font_outline_color", Color(0.06, 0.06, 0.09))
 	title.add_theme_constant_override("outline_size", 10)
-	_title_box.add_child(title)
+	title_box.add_child(title)
 
 	var sub := Label.new()
-	sub.text = "FORGE PASS!  —  看飞铁弧线 · 听木鱼风箱 · 一锤定音"
+	sub.text = "FORGE PASS!  —  听音辨拍 · 接飞铁 · 锤爆木桶"
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sub.add_theme_font_size_override("font_size", 18)
 	sub.modulate = Color(0.88, 0.92, 1.0)
-	_title_box.add_child(sub)
+	title_box.add_child(sub)
 
 	var rec_lbl := Label.new()
 	rec_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -141,12 +101,12 @@ func _build_scene() -> void:
 	else:
 		rec_lbl.text = "操作：Space / J / 鼠标左键"
 		rec_lbl.modulate = Color(0.75, 0.80, 0.92)
-	_title_box.add_child(rec_lbl)
+	title_box.add_child(rec_lbl)
 
 	var btn_row := HBoxContainer.new()
 	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	btn_row.add_theme_constant_override("separation", 18)
-	_title_box.add_child(btn_row)
+	title_box.add_child(btn_row)
 
 	var play_btn := Button.new()
 	play_btn.text = "开始锻造 ▶"
@@ -165,6 +125,15 @@ func _build_scene() -> void:
 	btn_row.add_child(_cal_btn)
 
 	_build_calibration_modal()
+
+
+func _draw_live_backdrop() -> void:
+	ForgePainter.draw_workshop_bg(_stage_canvas, _beat_pulse, _clock, "normal", sin(_clock * 1.5) * 0.04, true, _beat_pulse * 0.4)
+	ForgePainter.draw_anvil_station(_stage_canvas, Vector2(385, 505), _beat_pulse, 0.0, false, false)
+	ForgePainter.draw_anvil_station(_stage_canvas, Vector2(885, 505), _beat_pulse, 0.0, true, false)
+	ForgePainter.draw_barrel(_stage_canvas, Vector2(1170, 560), 0.0, [{"kind": "sword", "rot": -0.1}, {"kind": "pan", "rot": 0.15}], false)
+	ForgePainter.draw_master(_stage_canvas, Vector2(210, 615), _beat_pulse, _clock, 0.0, 0.0, "normal", false)
+	ForgePainter.draw_player(_stage_canvas, Vector2(1040, 615), _beat_pulse, _clock, 0.0, 0.0, "normal", Vector2(385, 450), false)
 
 
 func _build_calibration_modal() -> void:
@@ -268,7 +237,7 @@ func _record_cal_tap() -> void:
 
 func _update_cal_labels() -> void:
 	_cal_btn.text = "延迟校准 (%+d ms)" % int(GameState.audio_offset_ms)
-	_cal_status.text = "跟着木鱼拍点按 Space 或点击按钮 (%d/4 次)\n当前偏移：%+d ms" % [_cal_samples.size(), int(GameState.audio_offset_ms)]
+	_cal_status.text = "跟着木鱼鼓点按 Space 或点击按钮 (%d/4 次)\n当前偏移：%+d ms" % [_cal_samples.size(), int(GameState.audio_offset_ms)]
 
 
 func _start_game() -> void:
@@ -305,7 +274,4 @@ func _process(delta: float) -> void:
 			_beat_pulse = 1.0
 
 	_beat_pulse = maxf(0.0, _beat_pulse - delta * 5.5)
-	var sx := 1.0 + _beat_pulse * 0.06
-	var sy := 1.0 - _beat_pulse * 0.06
-	_master_spr.scale = Vector2(sx, sy)
-	_player_spr.scale = Vector2(sx, sy)
+	_stage_canvas.queue_redraw()
