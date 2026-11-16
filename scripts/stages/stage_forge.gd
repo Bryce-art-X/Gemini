@@ -39,10 +39,10 @@ var _banner_text: String = "听师傅木鱼+口令，闭眼也能打！"
 
 func _configure_stage() -> void:
 	stage_id = "forge"
-	stage_title = "铁匠打铁 ★精修标杆"
+	stage_title = "铁匠打铁 ★分件骨骼版"
 	stage_bpm = 115.0
 	music_style = "forge"
-	total_beats = 64.0
+	total_beats = 72.0
 
 	_sfx_cue_normal = SoundSynth.make_teacher_cue(660.0, 0.12, false)
 	_sfx_cue_offbeat = SoundSynth.make_teacher_cue(820.0, 0.10, true)
@@ -134,32 +134,38 @@ func _build_chart() -> void:
 	for i in range(4):
 		add_cue(float(i), "count_in", {"num": 4 - i})
 
-	_add_single(4.0)
-	_add_single(6.0)
-	_add_double(8.0)
-	_add_triple(12.0)
-	_add_heavy_charge(16.0)
-	_add_single(20.0)
-	_add_heavy_charge(21.0)
-	_add_offbeat_run(24.0)
+	# 8-beat Practice Warm-up
+	_add_single(4.0, true)
+	_add_single(6.0, true)
+	_add_single(8.0, true)
+	add_cue(10.0, "practice_done", {"msg": "热身结束！正式演出开始！"})
+
+	_add_single(12.0)
+	_add_single(14.0)
+	_add_double(16.0)
+	_add_triple(20.0)
+	_add_heavy_charge(24.0)
 	_add_single(28.0)
-	_add_single(30.0)
+	_add_heavy_charge(29.0)
+	_add_offbeat_run(32.0)
+	_add_single(36.0)
+	_add_single(38.0)
 
-	add_cue(32.0, "smoke_on", {"msg": "浓烟遮挡！靠耳朵盲打三连敲！"})
-	_add_triple(34.0)
-	add_cue(38.5, "smoke_off", {"msg": "烟雾散去！"})
+	add_cue(40.0, "smoke_on", {"msg": "浓烟遮挡！靠耳朵盲打三连敲！"})
+	_add_triple(42.0)
+	add_cue(46.5, "smoke_off", {"msg": "烟雾散去！"})
 
-	_add_heavy_charge(40.0)
-	_add_offbeat_run(44.0)
-	_add_double(48.0)
-	_add_triple(52.0)
-	_add_heavy_charge(56.0)
-	_add_triple(59.0)
+	_add_heavy_charge(48.0)
+	_add_offbeat_run(52.0)
+	_add_double(56.0)
+	_add_triple(60.0)
+	_add_heavy_charge(64.0)
+	_add_triple(67.0)
 
 
-func _add_single(b: float) -> void:
-	add_cue(b, "master_hit", {"msg": "叮！"})
-	add_target(b + 1.0, "single", {"heavy": false, "finish_sword": false})
+func _add_single(b: float, practice: bool = false) -> void:
+	add_cue(b, "master_hit", {"msg": "【练习】听师傅：叮！" if practice else "叮！"})
+	add_target(b + 1.0, "single", {"heavy": false, "finish_sword": false, "practice": practice})
 
 
 func _add_double(b: float) -> void:
@@ -200,8 +206,10 @@ func _on_beat(_beat_idx: int) -> void:
 func _on_cue_triggered(cue: Dictionary) -> void:
 	var kind: String = cue["kind"]
 	if kind == "count_in":
-		_banner_text = "准备... %d" % int(cue["num"])
+		_banner_text = "热身准备... %d" % int(cue["num"])
 		conductor.play_teacher_cue(_sfx_cue_normal, 0.12)
+	elif kind == "practice_done":
+		_banner_text = str(cue.get("msg", "正式开始！"))
 	elif kind == "master_hit":
 		_banner_text = str(cue.get("msg", "叮！"))
 		_master_rig.play_strike()

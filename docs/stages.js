@@ -1,12 +1,12 @@
 window.STAGES_META = [
   {
     id: "forge",
-    title: "铁匠打铁 ★精修标杆",
-    subtitle: "Forge Beat (Pro)",
+    title: "铁匠打铁 ★分件骨骼版",
+    subtitle: "Forge Beat (Rigged)",
     bpm: 115,
-    totalBeats: 64,
+    totalBeats: 72,
     accent: "#fa7a38",
-    description: "全套声学与演出升级！\n• 普通/三连敲：叮-叮-叮 后三连击\n• 重锤蓄力(2拍)：听『呼——』再重砸\n• 反拍切分 & 浓烟盲打挑战！",
+    description: "阶段一升级：4 关节骨骼动画 + 热身教学！\n• 8 拍无惩罚热身试打后进入正曲\n• 挥锤残影、表情切换、重锤蓄力与浓烟盲打",
   },
   {
     id: "factory",
@@ -48,16 +48,29 @@ window.createStageController = function createStageController(stageId) {
       return img;
     };
     const imgs = {
-      bg: loadImg("assets/forge_bg.png?v=3"),
-      master: loadImg("assets/master.png?v=3"),
-      player: loadImg("assets/player.png?v=3"),
-      anvil: loadImg("assets/anvil.png?v=3"),
+      bg: loadImg("assets/forge_bg.png?v=4"),
+      anvil: loadImg("assets/anvil.png?v=4"),
+      mTorso: loadImg("assets/master_torso.png?v=4"),
+      mNormal: loadImg("assets/master_head_normal.png?v=4"),
+      mHappy: loadImg("assets/master_head_happy.png?v=4"),
+      mConfused: loadImg("assets/master_head_confused.png?v=4"),
+      mSideeye: loadImg("assets/master_head_sideeye.png?v=4"),
+      pTorso: loadImg("assets/player_torso.png?v=4"),
+      pNormal: loadImg("assets/player_head_normal.png?v=4"),
+      armUpper: loadImg("assets/arm_upper.png?v=4"),
+      hammerArm: loadImg("assets/hammer_arm.png?v=4"),
+      ingot: loadImg("assets/ingot.png?v=4"),
+      sword: loadImg("assets/sword.png?v=4"),
+      spark: loadImg("assets/spark.png?v=4"),
     };
 
     const state = {
       masterSwing: 0,
       masterWindup: 0,
       playerSwing: 0,
+      masterTrail: 0,
+      playerTrail: 0,
+      isPractice: true,
       ingotHeat: 0.25,
       ingotSquash: 0, // >0 crooked pancake on Barely
       ingotState: "ready", // ready, flat, miss, sword
@@ -71,12 +84,12 @@ window.createStageController = function createStageController(stageId) {
       sparks: [],
       stars: [],
       flyingSwords: [],
-      banner: "听师傅木鱼+口令，闭眼也能打！",
+      banner: "热身教学：听师傅敲『叮』，你跟敲『咚』！",
     };
 
-    const addSingle = (b) => {
-      addCue(b, "master_hit", { msg: "叮！" });
-      addTarget(b + 1, "single", { heavy: false, finishSword: false });
+    const addSingle = (b, practice = false) => {
+      addCue(b, "master_hit", { msg: practice ? "【练习】听师傅：叮！" : "叮！" });
+      addTarget(b + 1, "single", { heavy: false, finishSword: false, practice });
     };
     const addDouble = (b) => {
       addCue(b, "master_hit", { msg: "叮！" });
@@ -107,35 +120,35 @@ window.createStageController = function createStageController(stageId) {
       addTarget(b + 3.5, "offbeat", { heavy: false, finishSword: true });
     };
 
-    // Bar 1 (4..7): Warm-up Singles
-    addSingle(4);
-    addSingle(6);
-    // Bar 2 (8..11): Double
-    addDouble(8);
-    // Bar 3 (12..15): Triple Fast Forge
-    addTriple(12);
-    // Bar 4 (16..19): Archetype D - Heavy 2-beat Charge!
-    addHeavyCharge(16);
-    // Bar 5 (20..23): Single + Heavy Charge
-    addSingle(20);
-    addHeavyCharge(21);
-    // Bar 6..7 (24..31): Archetype E - Off-beat Lockstep!
-    addOffbeatRun(24);
+    // Beats 4..11: 8-Beat Practice Warm-up (No Penalty!)
+    addSingle(4, true);
+    addSingle(6, true);
+    addSingle(8, true);
+    addCue(10, "practice_done", { msg: "热身结束！正式演出开始！" });
+
+    // Main Song (Beats 12..71)
+    addSingle(12);
+    addSingle(14);
+    addDouble(16);
+    addTriple(20);
+    addHeavyCharge(24);
     addSingle(28);
-    addSingle(30);
-    // Bar 8..9 (32..39): Blackout Smoke Blind-Test!
-    addCue(32, "smoke_on", { msg: "浓烟遮挡！靠耳朵盲打三连敲！" });
-    addTriple(34);
-    addCue(38.5, "smoke_off", { msg: "烟雾散去！" });
-    // Bar 10..11 (40..47): Heavy + Offbeat
-    addHeavyCharge(40);
-    addOffbeatRun(44);
-    // Bar 12..13 (48..55): Double + Triple
-    addDouble(48);
-    addTriple(52);
-    // Bar 14..15 (56..63): Grand Finale Heavy + Triple!
-    addHeavyCharge(56);
-    addTriple(59);
+    addHeavyCharge(29);
+    addOffbeatRun(32);
+    addSingle(36);
+    addSingle(38);
+
+    // Blackout Smoke Blind-Test!
+    addCue(40, "smoke_on", { msg: "浓烟遮挡！靠耳朵盲打三连敲！" });
+    addTriple(42);
+    addCue(46.5, "smoke_off", { msg: "烟雾散去！" });
+
+    addHeavyCharge(48);
+    addOffbeatRun(52);
+    addDouble(56);
+    addTriple(60);
+    addHeavyCharge(64);
+    addTriple(67);
 
     const spawnSparks = (x, y, count, gold = false) => {
       for (let i = 0; i < count; i++) {
@@ -177,10 +190,14 @@ window.createStageController = function createStageController(stageId) {
       },
       onCueVisual(cue) {
         if (cue.kind === "count_in") {
-          state.banner = `准备... ${cue.num}`;
+          state.banner = `热身准备... ${cue.num}`;
+        } else if (cue.kind === "practice_done") {
+          state.isPractice = false;
+          state.banner = cue.msg;
         } else if (cue.kind === "master_hit") {
           state.banner = cue.msg;
           state.masterSwing = 1;
+          state.masterTrail = 1;
           state.ingotHeat = 1;
           state.ingotState = "ready";
           state.ingotSquash = 0;
@@ -193,6 +210,7 @@ window.createStageController = function createStageController(stageId) {
         } else if (cue.kind === "offbeat_cue") {
           state.banner = cue.msg;
           state.masterSwing = 0.85;
+          state.masterTrail = 0.85;
           state.ingotState = "ready";
         } else if (cue.kind === "smoke_on") {
           state.banner = cue.msg;
@@ -205,6 +223,7 @@ window.createStageController = function createStageController(stageId) {
       onHit(target, grade, timingCtx) {
         const heavy = Boolean(target.heavy);
         state.playerSwing = 1;
+        state.playerTrail = 1;
         AudioEngine.playAnvilFoley(grade, heavy);
 
         if (grade === "perfect") {
@@ -253,6 +272,8 @@ window.createStageController = function createStageController(stageId) {
         state.masterSwing = Math.max(0, state.masterSwing - dt * 5.2);
         state.masterWindup = Math.max(0, state.masterWindup - dt * 1.3);
         state.playerSwing = Math.max(0, state.playerSwing - dt * 5.2);
+        state.masterTrail = Math.max(0, state.masterTrail - dt * 7.5);
+        state.playerTrail = Math.max(0, state.playerTrail - dt * 7.5);
         state.ingotHeat = Math.max(0.25, state.ingotHeat - dt * 1.2);
         state.shake = Math.max(0, state.shake - dt * 28);
         state.speedLines = Math.max(0, state.speedLines - dt * 4.5);
@@ -340,11 +361,71 @@ window.createStageController = function createStageController(stageId) {
         drawSprite(imgs.anvil, 325, 438, bopX, bopY, 0);
         drawSprite(imgs.anvil, 635, 438, bopX, bopY, 0);
 
-        // 3. Master Blacksmith (Left) with Windup/Swing animation
-        const mRot = state.masterWindup > 0 ? -0.14 * state.masterWindup : 0.16 * state.masterSwing;
-        const mScaleX = bopX * (1 + state.masterSwing * 0.10);
-        const mScaleY = bopY * (1 - state.masterSwing * 0.09);
-        drawSprite(imgs.master, 195, 438, mScaleX, mScaleY, mRot);
+        // 3. Articulated 4-Joint Blacksmith Rig Renderer
+        const drawRig = (x, y, torsoImg, headImg, swing, windup, trail, facingLeft) => {
+          ctx.save();
+          ctx.translate(x, y);
+          if (facingLeft) ctx.scale(-1, 1);
+
+          // Beat Bop squash & stretch + strike lean
+          const s = Math.max(0, swing);
+          const wScale = bopX * (1 + s * 0.14);
+          const hScale = bopY * (1 - s * 0.12);
+          const bodyTilt = windup > 0 ? -0.18 * windup : 0.14 * s;
+          ctx.rotate(bodyTilt);
+          ctx.scale(wScale, hScale);
+
+          // Torso
+          if (torsoImg.complete && torsoImg.naturalWidth > 0) {
+            ctx.drawImage(torsoImg, -torsoImg.width * 0.5, -torsoImg.height);
+          }
+
+          // Head (independent Beat Bop nod)
+          if (headImg.complete && headImg.naturalWidth > 0) {
+            ctx.save();
+            ctx.translate(0, -110);
+            ctx.rotate(beatPulse * 0.09);
+            ctx.drawImage(headImg, -headImg.width * 0.5, -headImg.height + 16);
+            ctx.restore();
+          }
+
+          // Shoulder -> UpperArm -> Elbow -> HammerArm
+          const shRot = windup > 0 ? (-0.75 - 1.25 * windup) : (-0.75 + 1.22 * s);
+          const elRot = windup > 0 ? (-0.60 - 0.35 * windup) : (-0.60 + 0.90 * s);
+
+          // Motion-blur Hammer Swing Trail!
+          if (trail > 0.05) {
+            ctx.save();
+            ctx.strokeStyle = `rgba(255, 240, 150, ${trail * 0.65})`;
+            ctx.lineWidth = 14 * trail;
+            ctx.beginPath();
+            ctx.arc(32, -82, 74, -1.65, 0.35);
+            ctx.stroke();
+            ctx.restore();
+          }
+
+          ctx.save();
+          ctx.translate(18, -88);
+          ctx.rotate(shRot);
+          if (imgs.armUpper.complete && imgs.armUpper.naturalWidth > 0) {
+            ctx.drawImage(imgs.armUpper, -10, -imgs.armUpper.height * 0.5);
+          }
+          ctx.translate(44, 0);
+          ctx.rotate(elRot);
+          if (imgs.hammerArm.complete && imgs.hammerArm.naturalWidth > 0) {
+            ctx.drawImage(imgs.hammerArm, -10, -imgs.hammerArm.height + 22);
+          }
+          ctx.restore();
+
+          ctx.restore();
+        };
+
+        const masterHead =
+          state.masterMood === "happy" ? imgs.mHappy :
+          state.masterMood === "confused" ? imgs.mConfused :
+          state.masterMood === "sideeye" ? imgs.mSideeye : imgs.mNormal;
+
+        drawRig(195, 438, imgs.mTorso, masterHead, state.masterSwing, state.masterWindup, state.masterTrail, false);
 
         // Master Reaction Bubble (Ace / Barely / Miss Side-Eye!)
         if (state.masterMood !== "normal") {
@@ -365,27 +446,21 @@ window.createStageController = function createStageController(stageId) {
           ctx.restore();
         }
 
-        // 4. Player Apprentice (Right) with Swing animation
-        const pRot = -0.18 * state.playerSwing;
-        const pScaleX = bopX * (1 + state.playerSwing * 0.11);
-        const pScaleY = bopY * (1 - state.playerSwing * 0.09);
-        drawSprite(imgs.player, 765, 438, pScaleX, pScaleY, pRot);
+        // 4. Player Apprentice (Right, facing left)
+        drawRig(765, 438, imgs.pTorso, imgs.pNormal, state.playerSwing, 0, state.playerTrail, true);
 
         // 5. Ingot on Player Anvil
-        ctx.strokeStyle = "#111116";
-        ctx.lineWidth = 3.5;
-        if (state.ingotState === "flat") {
-          ctx.fillStyle = "#c95b38";
-          ctx.fillRect(602, 326, 66, 7);
-          ctx.strokeRect(602, 326, 66, 7);
-        } else if (state.ingotState === "miss") {
-          ctx.fillStyle = "#5c575c";
-          ctx.fillRect(618, 344, 34, 10);
-          ctx.strokeRect(618, 344, 34, 10);
-        } else {
-          ctx.fillStyle = state.ingotHeat > 0.6 ? "#fff078" : "#ff6b2b";
-          ctx.fillRect(608, 318, 54, 15);
-          ctx.strokeRect(608, 318, 54, 15);
+        if (imgs.ingot.complete && imgs.ingot.naturalWidth > 0) {
+          ctx.save();
+          ctx.translate(635, 326);
+          if (state.ingotState === "flat") {
+            ctx.scale(1.25, 0.45);
+          } else if (state.ingotState === "miss") {
+            ctx.globalAlpha = 0.5;
+            ctx.translate(0, 16);
+          }
+          ctx.drawImage(imgs.ingot, -imgs.ingot.width * 0.5, -imgs.ingot.height * 0.5);
+          ctx.restore();
         }
 
         // 6. Flying Forged Swords
@@ -393,14 +468,9 @@ window.createStageController = function createStageController(stageId) {
           ctx.save();
           ctx.translate(sw.x, sw.y);
           ctx.rotate(sw.rot);
-          ctx.fillStyle = sw.heavy ? "#ffbe3b" : "#d9f4ff";
-          ctx.strokeStyle = "#111116";
-          ctx.lineWidth = 3.5;
-          ctx.fillRect(-6, -34, 12, 50);
-          ctx.strokeRect(-6, -34, 12, 50);
-          ctx.fillStyle = "#e0842d";
-          ctx.fillRect(-14, 12, 28, 8);
-          ctx.strokeRect(-14, 12, 28, 8);
+          if (imgs.sword.complete && imgs.sword.naturalWidth > 0) {
+            ctx.drawImage(imgs.sword, -imgs.sword.width * 0.5, -imgs.sword.height * 0.5);
+          }
           ctx.restore();
         }
 

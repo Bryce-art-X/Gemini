@@ -171,20 +171,23 @@ func _handle_player_tap() -> void:
 		return
 
 	best_target["judged"] = true
+	var is_practice := bool(best_target.get("practice", false))
 	if best_abs_err <= PERFECT_WINDOW:
 		best_target["result"] = "perfect"
-		perfect_count += 1
-		combo += 1
-		max_combo = maxi(max_combo, combo)
-		_show_judge("PERFECT!", Color(1.0, 0.86, 0.22))
+		if not is_practice:
+			perfect_count += 1
+			combo += 1
+			max_combo = maxi(max_combo, combo)
+		_show_judge("很好! (练习)" if is_practice else "ACE!", Color(1.0, 0.86, 0.22))
 		conductor.play_sfx(_sfx_perfect, 1.0, -3.0)
 		_on_player_hit(best_target, "perfect", signed_err)
 	elif best_abs_err <= GOOD_WINDOW:
 		best_target["result"] = "good"
-		good_count += 1
-		combo += 1
-		max_combo = maxi(max_combo, combo)
-		_show_judge("GOOD", Color(0.45, 0.92, 0.55))
+		if not is_practice:
+			good_count += 1
+			combo += 1
+			max_combo = maxi(max_combo, combo)
+		_show_judge("不错 (练习)" if is_practice else "BARELY", Color(0.62, 0.92, 0.42))
 		conductor.play_sfx(_sfx_good, 1.0, -3.0)
 		_on_player_hit(best_target, "good", signed_err)
 	else:
@@ -195,6 +198,10 @@ func _handle_player_tap() -> void:
 
 
 func _register_miss(target: Dictionary, was_early_or_wrong: bool) -> void:
+	if bool(target.get("practice", false)):
+		_show_judge("试着跟上!", Color(0.62, 0.72, 0.92))
+		_on_player_miss(target, was_early_or_wrong)
+		return
 	miss_count += 1
 	combo = 0
 	_show_judge("MISS", Color(0.95, 0.32, 0.36))

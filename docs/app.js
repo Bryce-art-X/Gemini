@@ -158,6 +158,11 @@
   }
 
   function registerMiss(target) {
+    if (target.practice) {
+      showJudge("试着跟上!", "#9eb4e8");
+      controller.onMiss(target);
+      return;
+    }
     missCount += 1;
     combo = 0;
     updateCombo();
@@ -193,22 +198,26 @@
     bestTarget.judged = true;
     const timingCtx = { startTime, beatSec };
     if (bestErr <= PERFECT_WIN) {
-      perfectCount += 1;
-      combo += 1;
-      maxCombo = Math.max(maxCombo, combo);
-      updateCombo();
-      showJudge("ACE!", "#ffd938");
+      if (!bestTarget.practice) {
+        perfectCount += 1;
+        combo += 1;
+        maxCombo = Math.max(maxCombo, combo);
+        updateCombo();
+      }
+      showJudge(bestTarget.practice ? "很好! (练习)" : "ACE!", "#ffd938");
       hitstopTimer = 0.045; // 3-frame hitstop!
       if (!controller.customHitAudio) {
         AudioEngine.playQuantizedChord([523.25, 659.25, 783.99], startTime, beatSec, 0.16, 0.22);
       }
       controller.onHit(bestTarget, "perfect", timingCtx);
     } else if (bestErr <= GOOD_WIN) {
-      goodCount += 1;
-      combo += 1;
-      maxCombo = Math.max(maxCombo, combo);
-      updateCombo();
-      showJudge("BARELY", "#9ce868");
+      if (!bestTarget.practice) {
+        goodCount += 1;
+        combo += 1;
+        maxCombo = Math.max(maxCombo, combo);
+        updateCombo();
+      }
+      showJudge(bestTarget.practice ? "不错 (练习)" : "BARELY", "#9ce868");
       if (!controller.customHitAudio) {
         AudioEngine.playTone(440, 0.1, "triangle", 0.2);
       }
