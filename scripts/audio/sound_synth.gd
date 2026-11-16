@@ -141,6 +141,76 @@ static func make_miss_buzz(volume: float = 0.35) -> AudioStreamWAV:
 	return _samples_to_wav(samples)
 
 
+static func make_teacher_cue(pitch_hz: float = 660.0, duration: float = 0.13, is_offbeat: bool = false) -> AudioStreamWAV:
+	var n := maxi(1, int(duration * SAMPLE_RATE))
+	var samples := PackedFloat32Array()
+	samples.resize(n)
+	var click_len := mini(n, int(0.018 * SAMPLE_RATE))
+	for i in range(n):
+		var t := float(i) / SAMPLE_RATE
+		var p := float(i) / float(n)
+		# Layer 1: Woodblock / Cowbell 15ms Transient
+		var click := 0.0
+		if i < click_len:
+			var cp := float(i) / float(click_len)
+			var cf := lerpf(2100.0 if is_offbeat else 1680.0, 900.0, cp)
+			click = _wave_sample(t * cf, "square" if is_offbeat else "triangle") * (1.0 - cp) * 0.45
+		# Layer 2: Formant-rich Vocal Body
+		var env := minf(1.0, float(i) / (0.008 * SAMPLE_RATE)) * pow(1.0 - p, 1.6)
+		var body := (sin(t * pitch_hz * TAU) * 0.65 + sin(t * pitch_hz * 2.0 * TAU) * 0.25 + sin(t * pitch_hz * 3.0 * TAU) * 0.12) * env * 0.48
+		samples[i] = click + body
+	return _samples_to_wav(samples)
+
+
+static func make_charge_cue(start_hz: float = 260.0, end_hz: float = 620.0, duration: float = 0.75) -> AudioStreamWAV:
+	var n := maxi(1, int(duration * SAMPLE_RATE))
+	var samples := PackedFloat32Array()
+	samples.resize(n)
+	var phase := 0.0
+	for i in range(n):
+		var p := float(i) / float(n)
+		var freq := lerpf(start_hz, end_hz, p * p)
+		phase += freq / SAMPLE_RATE
+		var env := minf(1.0, p * 8.0) * (1.0 - p * 0.35)
+		samples[i] = (_wave_sample(phase, "saw") * 0.35 + sin(phase * TAU) * 0.45) * env * 0.42
+	return _samples_to_wav(samples)
+
+
+static func make_anvil_foley(heavy: bool = false) -> AudioStreamWAV:
+	var duration := 0.28 if heavy else 0.20
+	var n := int(duration * SAMPLE_RATE)
+	var samples := PackedFloat32Array()
+	samples.resize(n)
+	var phase := 0.0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 99
+	for i in range(n):
+		var t := float(i) / SAMPLE_RATE
+		var p := float(i) / float(n)
+		# Sub-bass punch
+		var sub_f := lerpf(135.0, 44.0, minf(1.0, p * 3.0))
+		phase += sub_f / SAMPLE_RATE
+		var sub := sin(phase * TAU) * pow(1.0 - p, 2.5) * (0.65 if heavy else 0.48)
+		# Metallic anvil ring
+		var ring := (sin(t * 1480.0 * TAU) + sin(t * 2210.0 * TAU) * 0.7 + sin(t * 3320.0 * TAU) * 0.4) * pow(1.0 - p, 2.0) * 0.22
+		# Crisp 25ms transient click
+		var click := rng.randf_range(-1.0, 1.0) * maxf(0.0, 1.0 - p * 8.0) * 0.35
+		samples[i] = sub + ring + click
+	return _samples_to_wav(samples)
+
+
+static func make_barely_thud() -> AudioStreamWAV:
+	var duration := 0.12
+	var n := int(duration * SAMPLE_RATE)
+	var samples := PackedFloat32Array()
+	samples.resize(n)
+	for i in range(n):
+		var t := float(i) / SAMPLE_RATE
+		var p := float(i) / float(n)
+		samples[i] = sin(t * lerpf(200.0, 90.0, p) * TAU) * pow(1.0 - p, 2.0) * 0.32
+	return _samples_to_wav(samples)
+
+
 static func _mix_kick(buf: PackedFloat32Array, start_idx: int, vol: float) -> void:
 	var n := int(0.16 * SAMPLE_RATE)
 	var phase := 0.0

@@ -15,6 +15,8 @@ var is_running: bool = false
 var _backing_player: AudioStreamPlayer
 var _sfx_pool: Array[AudioStreamPlayer] = []
 var _sfx_cursor: int = 0
+var _bgm_bus_idx: int = -1
+var _duck_tween: Tween
 
 var _loop_sec: float = 8.0
 var _loop_count: int = 0
@@ -27,11 +29,14 @@ var _is_headless: bool = false
 
 func _ready() -> void:
 	_is_headless = DisplayServer.get_name() == "headless"
+	_bgm_bus_idx = AudioServer.get_bus_index("BGM")
 	_backing_player = AudioStreamPlayer.new()
-	_backing_player.volume_db = -4.0
+	_backing_player.volume_db = -3.0
+	if _bgm_bus_idx >= 0:
+		_backing_player.bus = &"BGM"
 	add_child(_backing_player)
 
-	for i in range(10):
+	for i in range(12):
 		var p := AudioStreamPlayer.new()
 		add_child(p)
 		_sfx_pool.append(p)
@@ -67,7 +72,22 @@ func pause_audio(paused: bool) -> void:
 	is_running = not paused
 
 
-func play_sfx(stream: AudioStream, pitch_scale: float = 1.0, volume_db: float = 0.0) -> void:
+func duck_bgm(hold_sec: float = 0.16) -> void:
+	if _bgm_bus_idx < 0 or _is_headless:
+		return
+	if _duck_tween and _duck_tween.is_valid():
+		_duck_tween.kill()
+	AudioServer.set_bus_volume_db(_bgm_bus_idx, -14.0)
+	_duck_tween = create_tween()
+	_duck_tween.tween_method(
+		func(db: float) -> void: AudioServer.set_bus_volume_db(_bgm_bus_idx, db),
+		-14.0,
+		-2.0,
+		hold_sec
+	)
+
+
+func play_sfx(stream: AudioStream, pitch_scale: float = 1.0, volume_db: float = 0.0, bus_name: StringName = &"Master") -> void:
 	if stream == null or _is_headless:
 		return
 	var p := _sfx_pool[_sfx_cursor]
@@ -75,7 +95,19 @@ func play_sfx(stream: AudioStream, pitch_scale: float = 1.0, volume_db: float = 
 	p.stream = stream
 	p.pitch_scale = pitch_scale
 	p.volume_db = volume_db
+	p.bus = bus_name if AudioServer.get_bus_index(bus_name) >= 0 else &"Master"
 	p.play()
+
+
+func play_teacher_cue(stream: AudioStream, hold_duck: float = 0.16) -> void:
+	duck_bgm(hold_duck)
+	play_sfx(stream, 1.0, 0.0, &"TeacherCue")
+
+
+func play_player_sfx(stream: AudioStream, pitch_scale: float = 1.0, volume_db: float = 0.0, duck: bool = false) -> void:
+	if duck:
+		duck_bgm(0.18)
+	play_sfx(stream, pitch_scale, volume_db, &"PlayerHit")
 
 
 func _process(delta: float) -> void:
