@@ -4,68 +4,75 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>节奏天国 · 迷你合集 (Web)</title>
-  <link rel="stylesheet" href="style.css?v=4" />
+  <title>铁匠传球！Forge Pass!</title>
+  <link rel="stylesheet" href="style.css?v=5" />
 </head>
 <body>
   <div id="app">
-    <!-- 主菜单 -->
-    <section id="menu-screen" class="screen active">
-      <header class="menu-header">
-        <h1>节奏天国 · 迷你合集</h1>
-        <p class="subtitle">听音辨拍 · 手机点击屏幕 / 电脑按 Space 或 J</p>
-      </header>
+    <!-- 标题封面 -->
+    <section id="title-screen" class="screen active">
+      <div class="title-bg"></div>
+      <div class="title-card">
+        <div class="title-badge">RHYTHM FORGE • 120 BPM</div>
+        <h1>铁匠传球！</h1>
+        <p class="title-sub">FORGE PASS! — 看飞铁弧线 · 听木鱼风箱 · 一锤定音</p>
+        <p id="title-record" class="title-record">操作：点击屏幕 / Space / J</p>
+        <div id="loading-bar" class="loading-bar">正在加载母带音频与美术资产...</div>
+        <div class="title-actions">
+          <button id="btn-play" class="btn-cartoon btn-gold" type="button" disabled>加载中...</button>
+          <button id="btn-calibrate" class="btn-cartoon btn-blue" type="button">延迟校准 (0 ms)</button>
+        </div>
+      </div>
 
-      <div id="stage-cards" class="stage-cards"></div>
-
-      <footer class="menu-footer">
-        <label for="offset-slider">音频延迟校准：<strong id="offset-value">0 ms</strong></label>
-        <input id="offset-slider" type="range" min="-120" max="120" step="5" value="0" />
-      </footer>
+      <!-- 延迟校准弹窗 -->
+      <div id="cal-overlay" class="modal-overlay hidden">
+        <div class="modal-card">
+          <h2>音频延迟校准</h2>
+          <p id="cal-status" class="cal-status">跟着木鱼鼓点点击下方按钮 4 次</p>
+          <button id="btn-cal-tap" class="btn-cartoon btn-gold" type="button">跟着节拍点我！(Space)</button>
+          <input id="cal-slider" type="range" min="-120" max="120" step="5" value="0" />
+          <button id="btn-cal-close" class="btn-cartoon btn-green" type="button">完成并返回</button>
+        </div>
+      </div>
     </section>
 
     <!-- 游戏界面 -->
     <section id="game-screen" class="screen">
       <header class="game-hud">
-        <div class="hud-left">
-          <span id="hud-title" class="hud-title">铁匠打铁</span>
-          <span id="hud-bpm" class="hud-bpm">115 BPM</span>
-        </div>
+        <span id="practice-pill" class="practice-pill">热身练习 (不计分)</span>
         <div class="progress-wrap">
           <div id="hud-progress" class="progress-bar"></div>
         </div>
-        <div class="hud-right">
-          <span id="hud-combo" class="hud-combo hidden">0 COMBO</span>
-          <button id="btn-back" class="btn-small" type="button">选关</button>
-        </div>
+        <span id="hud-combo" class="hud-combo hidden">0 COMBO</span>
+        <button id="btn-back" class="btn-small" type="button">封面</button>
       </header>
 
       <div class="canvas-wrap">
-        <canvas id="game-canvas" width="960" height="540"></canvas>
-        <div id="judge-popup" class="judge-popup hidden">PERFECT!</div>
+        <canvas id="game-canvas" width="1280" height="720"></canvas>
+        <div id="judge-popup" class="judge-popup hidden">ACE!</div>
       </div>
 
       <div id="tap-pad" class="tap-pad">
-        <span>点击这里打拍 (TAP / SPACE)</span>
+        <span>点击打铁！(TAP / SPACE)</span>
       </div>
 
-      <!-- 结算弹窗 -->
-      <div id="result-overlay" class="result-overlay hidden">
-        <div class="result-card">
-          <h2>演出结束！</h2>
+      <!-- 铁匠铺周刊结算卡 -->
+      <div id="result-overlay" class="modal-overlay hidden">
+        <div class="paper-card">
+          <div class="paper-hdr">— 铁匠铺周刊 · 演出日报 —</div>
           <div id="result-rank" class="result-rank">超棒! Superb</div>
+          <p id="result-headline" class="result-headline"></p>
           <p id="result-stats" class="result-stats"></p>
           <div class="result-actions">
-            <button id="btn-retry" class="btn-primary" type="button">再玩一次</button>
-            <button id="btn-menu" class="btn-secondary" type="button">返回选关</button>
+            <button id="btn-retry" class="btn-cartoon btn-gold" type="button">再锻一次</button>
+            <button id="btn-menu" class="btn-cartoon btn-blue" type="button">返回封面</button>
           </div>
         </div>
       </div>
     </section>
   </div>
 
-  <script src="audio.js?v=4"></script>
-  <script src="stages.js?v=4"></script>
-  <script src="app.js?v=4"></script>
+  <script src="audio.js?v=5"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

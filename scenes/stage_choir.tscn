@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://scripts/stages/stage_choir.gd" id="1"]
-
-[node name="StageChoir" type="Node2D"]
-script = ExtResource("1")

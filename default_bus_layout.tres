@@ -2,8 +2,8 @@
 
 [sub_resource type="AudioEffectLowPassFilter" id="AudioEffectLowPassFilter_bgm"]
 resource_name = "LowPassFilter"
-cutoff_hz = 880.0
-resonance = 0.7
+cutoff_hz = 12000.0
+resonance = 0.5
 
 [sub_resource type="AudioEffectPanner" id="AudioEffectPanner_cue"]
 resource_name = "Panner"

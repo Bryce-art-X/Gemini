@@ -1,42 +1,12 @@
 extends Node
 
-const SAVE_PATH := "user://rhythm_mini_save.cfg"
+const SAVE_PATH := "user://forge_pass_save.cfg"
 
 var audio_offset_ms: float = 0.0
-
-# Stage definitions
-const STAGES := [
-	{
-		"id": "forge",
-		"title": "铁匠打铁",
-		"subtitle": "Forge Beat",
-		"bpm": 115.0,
-		"description": "听师傅打铁的节奏！\n普通拍：师傅敲1下，你跟敲1下。\n三连敲：叮-叮-叮 后紧跟三连击！",
-		"scene_path": "res://scenes/stage_forge.tscn",
-		"accent": Color(0.98, 0.48, 0.22),
-	},
-	{
-		"id": "factory",
-		"title": "流水线接球",
-		"subtitle": "Factory Catch",
-		"bpm": 120.0,
-		"description": "盯紧传送带上的零件！\n普通件：1 - 2 - 3 - 【抓！】\n金色加速件：哔哔 - 【快抓！】",
-		"scene_path": "res://scenes/stage_factory.tscn",
-		"accent": Color(0.24, 0.76, 0.96),
-	},
-	{
-		"id": "choir",
-		"title": "合唱团点名",
-		"subtitle": "Choir Snap",
-		"bpm": 108.0,
-		"description": "你是站在最右边的小合唱员！\n听指挥或队友点名：1 - 2 - 3 - 【轮到你！】\n注意齐唱信号：一起——【嘿！】",
-		"scene_path": "res://scenes/stage_choir.tscn",
-		"accent": Color(0.95, 0.35, 0.58),
-	},
-]
-
-# stage_id -> { "rank": String, "accuracy": float }
-var best_records: Dictionary = {}
+var best_rank: String = ""
+var best_accuracy: float = 0.0
+var best_combo: int = 0
+var has_perfect_medal: bool = false
 
 
 func _ready() -> void:
@@ -48,28 +18,33 @@ func load_data() -> void:
 	if cfg.load(SAVE_PATH) != OK:
 		return
 	audio_offset_ms = float(cfg.get_value("settings", "audio_offset_ms", 0.0))
-	for stage in STAGES:
-		var sid: String = stage["id"]
-		var rank: String = str(cfg.get_value("records", sid + "_rank", ""))
-		var acc: float = float(cfg.get_value("records", sid + "_acc", 0.0))
-		if rank != "":
-			best_records[sid] = {"rank": rank, "accuracy": acc}
+	best_rank = str(cfg.get_value("record", "rank", ""))
+	best_accuracy = float(cfg.get_value("record", "accuracy", 0.0))
+	best_combo = int(cfg.get_value("record", "combo", 0))
+	has_perfect_medal = bool(cfg.get_value("record", "perfect_medal", false))
 
 
 func save_data() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("settings", "audio_offset_ms", audio_offset_ms)
-	for sid in best_records.keys():
-		cfg.set_value("records", sid + "_rank", best_records[sid]["rank"])
-		cfg.set_value("records", sid + "_acc", best_records[sid]["accuracy"])
+	cfg.set_value("record", "rank", best_rank)
+	cfg.set_value("record", "accuracy", best_accuracy)
+	cfg.set_value("record", "combo", best_combo)
+	cfg.set_value("record", "perfect_medal", has_perfect_medal)
 	cfg.save(SAVE_PATH)
 
 
-func update_record(stage_id: String, rank: String, accuracy: float) -> void:
-	var prev: Dictionary = best_records.get(stage_id, {"rank": "", "accuracy": -1.0})
-	if accuracy > float(prev["accuracy"]):
-		best_records[stage_id] = {"rank": rank, "accuracy": accuracy}
-		save_data()
+func update_record(accuracy: float, max_combo: int, miss_count: int) -> String:
+	var rank := compute_rank(accuracy)
+	if accuracy > best_accuracy:
+		best_accuracy = accuracy
+		best_rank = rank
+	if max_combo > best_combo:
+		best_combo = max_combo
+	if miss_count == 0 and accuracy >= 95.0:
+		has_perfect_medal = true
+	save_data()
+	return rank
 
 
 static func compute_rank(accuracy: float) -> String:
