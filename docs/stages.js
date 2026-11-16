@@ -1,12 +1,12 @@
 window.STAGES_META = [
   {
     id: "forge",
-    title: "铁匠打铁",
-    subtitle: "Forge Beat",
+    title: "铁匠打铁 ★精修标杆",
+    subtitle: "Forge Beat (Pro)",
     bpm: 115,
     totalBeats: 64,
     accent: "#fa7a38",
-    description: "听师傅打铁的节奏！\n普通拍：师傅敲1下，你跟敲1下。\n三连敲：叮-叮-叮 后紧跟三连击！",
+    description: "全套声学与演出升级！\n• 普通/三连敲：叮-叮-叮 后三连击\n• 重锤蓄力(2拍)：听『呼——』再重砸\n• 反拍切分 & 浓烟盲打挑战！",
   },
   {
     id: "factory",
@@ -37,7 +37,6 @@ window.createStageController = function createStageController(stageId) {
   const addTarget = (beat, kind, extra = {}) =>
     targets.push({ beat, kind, judged: false, result: "", ...extra });
 
-  // Count-in
   for (let i = 0; i < 4; i++) {
     addCue(i, "count_in", { num: 4 - i });
   }
@@ -45,183 +44,487 @@ window.createStageController = function createStageController(stageId) {
   if (stageId === "forge") {
     const state = {
       masterSwing: 0,
+      masterWindup: 0,
       playerSwing: 0,
-      ingotHeat: 0.2,
+      ingotHeat: 0.25,
+      ingotSquash: 0, // >0 crooked pancake on Barely
+      ingotState: "ready", // ready, flat, miss, sword
+      masterMood: "normal", // normal, happy, confused, sideeye
+      moodTimer: 0,
       shake: 0,
+      speedLines: 0,
+      smokeAlpha: 0,
+      smokeTarget: 0,
       swords: 0,
       sparks: [],
-      banner: "听师傅敲击的节奏！",
+      stars: [],
+      flyingSwords: [],
+      banner: "听师傅木鱼+口令，闭眼也能打！",
     };
 
     const addSingle = (b) => {
       addCue(b, "master_hit", { msg: "叮！" });
-      addTarget(b + 1, "single", { finishSword: false });
+      addTarget(b + 1, "single", { heavy: false, finishSword: false });
     };
     const addDouble = (b) => {
       addCue(b, "master_hit", { msg: "叮！" });
       addCue(b + 1, "master_hit", { msg: "叮-叮！" });
-      addTarget(b + 2, "double", { finishSword: false });
-      addTarget(b + 3, "double", { finishSword: true });
+      addTarget(b + 2, "double", { heavy: false, finishSword: false });
+      addTarget(b + 3, "double", { heavy: false, finishSword: true });
     };
     const addTriple = (b) => {
       addCue(b, "master_hit", { msg: "三连敲：叮-" });
       addCue(b + 0.5, "master_hit", { msg: "三连敲：叮-叮-" });
       addCue(b + 1.0, "master_hit", { msg: "三连敲：叮-叮-叮！" });
-      addTarget(b + 2.0, "triple", { finishSword: false });
-      addTarget(b + 2.5, "triple", { finishSword: false });
-      addTarget(b + 3.0, "triple", { finishSword: true });
+      addTarget(b + 2.0, "triple", { heavy: false, finishSword: false });
+      addTarget(b + 2.5, "triple", { heavy: false, finishSword: false });
+      addTarget(b + 3.0, "triple", { heavy: false, finishSword: true });
+    };
+    // Archetype D: 2-beat Heavy Charge (Binary Cue Discrimination)
+    const addHeavyCharge = (b) => {
+      addCue(b, "charge_start", { msg: "重锤蓄力：呼——！" });
+      addTarget(b + 2.0, "heavy", { heavy: true, finishSword: true });
+    };
+    // Archetype E: Off-beat Lockstep (8th-note syncopation)
+    const addOffbeatRun = (b) => {
+      addCue(b, "offbeat_cue", { msg: "切换反拍：嘿-哒！" });
+      addCue(b + 0.5, "offbeat_cue", { msg: "反拍准备：哒-哒！" });
+      addCue(b + 1.0, "offbeat_cue", { msg: "跟上反拍空隙！" });
+      addTarget(b + 1.5, "offbeat", { heavy: false, finishSword: false });
+      addTarget(b + 2.5, "offbeat", { heavy: false, finishSword: false });
+      addTarget(b + 3.5, "offbeat", { heavy: false, finishSword: true });
     };
 
-    addSingle(4); addSingle(6);
-    addSingle(8); addSingle(10);
-    addDouble(12);
-    addTriple(16);
-    addSingle(20); addSingle(22);
-    addTriple(24);
-    addDouble(28);
-    addTriple(32);
-    addSingle(36); addSingle(38);
-    addTriple(40);
-    addDouble(44);
-    addTriple(48);
+    // Bar 1 (4..7): Warm-up Singles
+    addSingle(4);
+    addSingle(6);
+    // Bar 2 (8..11): Double
+    addDouble(8);
+    // Bar 3 (12..15): Triple Fast Forge
+    addTriple(12);
+    // Bar 4 (16..19): Archetype D - Heavy 2-beat Charge!
+    addHeavyCharge(16);
+    // Bar 5 (20..23): Single + Heavy Charge
+    addSingle(20);
+    addHeavyCharge(21);
+    // Bar 6..7 (24..31): Archetype E - Off-beat Lockstep!
+    addOffbeatRun(24);
+    addSingle(28);
+    addSingle(30);
+    // Bar 8..9 (32..39): Blackout Smoke Blind-Test!
+    addCue(32, "smoke_on", { msg: "浓烟遮挡！靠耳朵盲打三连敲！" });
+    addTriple(34);
+    addCue(38.5, "smoke_off", { msg: "烟雾散去！" });
+    // Bar 10..11 (40..47): Heavy + Offbeat
+    addHeavyCharge(40);
+    addOffbeatRun(44);
+    // Bar 12..13 (48..55): Double + Triple
+    addDouble(48);
     addTriple(52);
-    addTriple(56);
+    // Bar 14..15 (56..63): Grand Finale Heavy + Triple!
+    addHeavyCharge(56);
+    addTriple(59);
 
-    const spawnSparks = (x, y, count) => {
+    const spawnSparks = (x, y, count, gold = false) => {
       for (let i = 0; i < count; i++) {
         const ang = -Math.PI * (0.05 + Math.random() * 0.9);
-        const spd = 140 + Math.random() * 260;
-        state.sparks.push({ x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, life: 0.45 });
+        const spd = 160 + Math.random() * 300;
+        state.sparks.push({ x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, life: 0.45, gold });
       }
     };
+
+    const spawnStars = (x, y, count) => {
+      for (let i = 0; i < count; i++) {
+        const ang = (Math.PI * 2 * i) / count + Math.random() * 0.3;
+        const spd = 120 + Math.random() * 140;
+        state.stars.push({ x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd - 40, life: 0.48, size: 12 + Math.random() * 8 });
+      }
+    };
+
+    const chords = [
+      [440.0, 554.37, 659.25], // A major
+      [523.25, 659.25, 783.99], // C major
+      [587.33, 739.99, 880.0], // D major
+    ];
+    let chordIdx = 0;
 
     return {
       cues,
       targets,
-      scheduleCueAudio(cue, when) {
-        if (cue.kind === "count_in") AudioEngine.playTone(660, 0.1, "triangle", 0.2, when);
-        else if (cue.kind === "master_hit") AudioEngine.playTone(880, 0.14, "triangle", 0.34, when);
+      customHitAudio: true,
+      scheduleCueAudio(cue, when, beatSec) {
+        if (cue.kind === "count_in") {
+          AudioEngine.playTeacherCue(520, 1500, 0.09, when, false);
+        } else if (cue.kind === "master_hit") {
+          AudioEngine.playTeacherCue(660, 1850, 0.12, when, false);
+        } else if (cue.kind === "charge_start") {
+          AudioEngine.playChargeCue(260, 620, beatSec * 1.75, when);
+        } else if (cue.kind === "offbeat_cue") {
+          AudioEngine.playTeacherCue(820, 2300, 0.10, when, true);
+        }
       },
       onCueVisual(cue) {
-        if (cue.kind === "count_in") state.banner = `准备... ${cue.num}`;
-        else if (cue.kind === "master_hit") {
+        if (cue.kind === "count_in") {
+          state.banner = `准备... ${cue.num}`;
+        } else if (cue.kind === "master_hit") {
           state.banner = cue.msg;
           state.masterSwing = 1;
           state.ingotHeat = 1;
+          state.ingotState = "ready";
+          state.ingotSquash = 0;
+        } else if (cue.kind === "charge_start") {
+          state.banner = cue.msg;
+          state.masterWindup = 1;
+          state.ingotHeat = 1;
+          state.ingotState = "ready";
+          state.ingotSquash = 0;
+        } else if (cue.kind === "offbeat_cue") {
+          state.banner = cue.msg;
+          state.masterSwing = 0.85;
+          state.ingotState = "ready";
+        } else if (cue.kind === "smoke_on") {
+          state.banner = cue.msg;
+          state.smokeTarget = 1;
+        } else if (cue.kind === "smoke_off") {
+          state.banner = cue.msg;
+          state.smokeTarget = 0;
         }
       },
-      onHit(target, grade) {
+      onHit(target, grade, timingCtx) {
+        const heavy = Boolean(target.heavy);
         state.playerSwing = 1;
-        state.shake = grade === "perfect" ? 7 : 3.5;
-        spawnSparks(615, 335, grade === "perfect" ? 16 : 8);
-        AudioEngine.playChord([293.66, 587.33, 880], 0.18, "square", 0.16);
-        if (target.finishSword) {
-          state.swords += 1;
-          state.banner = `名剑出炉！(${state.swords})`;
-          AudioEngine.playChord([587.33, 739.99, 880, 1174.66], 0.3, "triangle", 0.26);
+        AudioEngine.playAnvilFoley(grade, heavy);
+
+        if (grade === "perfect") {
+          state.shake = heavy ? 11 : 7;
+          state.speedLines = 1;
+          state.masterMood = "happy";
+          state.moodTimer = 0.65;
+          spawnSparks(615, 332, heavy ? 26 : 16, true);
+          spawnStars(615, 315, heavy ? 7 : 4);
+
+          // Quantized Resolution Harmony on 16th-note grid!
+          const ch = chords[chordIdx % chords.length];
+          chordIdx += 1;
+          AudioEngine.playQuantizedChord(ch, timingCtx.startTime, timingCtx.beatSec, 0.24, 0.28);
+
+          if (target.finishSword) {
+            state.swords += 1;
+            state.ingotState = "sword";
+            state.flyingSwords.push({ x: 615, y: 325, vx: 210, vy: -320, rot: -0.3, life: 1.1, heavy });
+            state.banner = heavy ? `战斧铸成！(${state.swords})` : `名剑出炉！(${state.swords})`;
+            AudioEngine.playQuantizedChord([587.33, 739.99, 880.0, 1174.66], timingCtx.startTime, timingCtx.beatSec, 0.34, 0.30);
+          }
+        } else {
+          // Barely! Crooked flattened ingot + Master confused
+          state.shake = 2.5;
+          state.ingotState = "flat";
+          state.ingotSquash = 1;
+          state.masterMood = "confused";
+          state.moodTimer = 0.75;
+          spawnSparks(615, 335, 5, false);
+          state.banner = "擦边打歪了点...";
         }
       },
       onMiss() {
-        state.playerSwing = 0.5;
-        state.banner = "哎呀，打歪了！";
+        state.playerSwing = 0.45;
+        state.ingotState = "miss";
+        state.masterMood = "sideeye";
+        state.moodTimer = 1.15;
+        state.banner = "漏拍啦！师傅在斜眼看你...";
       },
       onEmptyTap() {
-        state.playerSwing = 0.6;
-        AudioEngine.playTone(220, 0.08, "triangle", 0.08);
+        state.playerSwing = 0.65;
+        AudioEngine.playAnvilFoley("good", false);
       },
       update(dt) {
-        state.masterSwing = Math.max(0, state.masterSwing - dt * 5);
-        state.playerSwing = Math.max(0, state.playerSwing - dt * 5);
-        state.ingotHeat = Math.max(0.2, state.ingotHeat - dt * 1.4);
-        state.shake = Math.max(0, state.shake - dt * 26);
+        state.masterSwing = Math.max(0, state.masterSwing - dt * 5.2);
+        state.masterWindup = Math.max(0, state.masterWindup - dt * 1.3);
+        state.playerSwing = Math.max(0, state.playerSwing - dt * 5.2);
+        state.ingotHeat = Math.max(0.25, state.ingotHeat - dt * 1.2);
+        state.shake = Math.max(0, state.shake - dt * 28);
+        state.speedLines = Math.max(0, state.speedLines - dt * 4.5);
+        state.smokeAlpha += (state.smokeTarget - state.smokeAlpha) * Math.min(1, dt * 4.5);
+        if (state.moodTimer > 0) {
+          state.moodTimer -= dt;
+          if (state.moodTimer <= 0) state.masterMood = "normal";
+        }
+
         for (let i = state.sparks.length - 1; i >= 0; i--) {
           const sp = state.sparks[i];
           sp.life -= dt;
           if (sp.life <= 0) state.sparks.splice(i, 1);
           else {
-            sp.vy += 580 * dt;
+            sp.vy += 620 * dt;
             sp.x += sp.vx * dt;
             sp.y += sp.vy * dt;
           }
         }
+        for (let i = state.stars.length - 1; i >= 0; i--) {
+          const st = state.stars[i];
+          st.life -= dt;
+          if (st.life <= 0) state.stars.splice(i, 1);
+          else {
+            st.x += st.vx * dt;
+            st.y += st.vy * dt;
+          }
+        }
+        for (let i = state.flyingSwords.length - 1; i >= 0; i--) {
+          const sw = state.flyingSwords[i];
+          sw.life -= dt;
+          sw.vy += 520 * dt;
+          sw.x += sw.vx * dt;
+          sw.y += sw.vy * dt;
+          sw.rot += 4.2 * dt;
+          if (sw.life <= 0) state.flyingSwords.splice(i, 1);
+        }
       },
       draw(ctx, beatPulse) {
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+
         const sx = (Math.random() * 2 - 1) * state.shake;
         const sy = (Math.random() * 2 - 1) * state.shake;
-        ctx.fillStyle = `rgb(${28 + beatPulse * 14}, ${18 + beatPulse * 8}, 16)`;
+        // Flat vibrant Rhythm Heaven warm background
+        ctx.fillStyle = `rgb(${44 + beatPulse * 14}, ${24 + beatPulse * 8}, ${22 + beatPulse * 6})`;
         ctx.fillRect(0, 0, 960, 540);
 
         ctx.save();
         ctx.translate(sx, sy);
 
-        // Furnace
-        ctx.fillStyle = "rgba(255, 110, 35, 0.16)";
+        // Universal Beat Bop factor
+        const bopX = 1 + beatPulse * 0.08;
+        const bopY = 1 - beatPulse * 0.08;
+
+        // Furnace (with bold black ink outline)
+        ctx.save();
+        ctx.translate(480, 345);
+        ctx.scale(bopX, bopY);
+        ctx.fillStyle = "rgba(255, 130, 40, 0.20)";
         ctx.beginPath();
-        ctx.arc(480, 260, 145 + beatPulse * 14, 0, Math.PI * 2);
+        ctx.arc(0, -85, 135, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = "#392929";
-        ctx.fillRect(405, 175, 150, 150);
-        ctx.fillStyle = "#ff7c1f";
+
+        ctx.fillStyle = "#594040";
+        ctx.strokeStyle = "#111116";
+        ctx.lineWidth = 4.5;
+        ctx.fillRect(-78, -170, 156, 170);
+        ctx.strokeRect(-78, -170, 156, 170);
+
+        ctx.fillStyle = "#ff8a24";
         ctx.beginPath();
-        ctx.arc(480, 255, 52 + beatPulse * 5, 0, Math.PI * 2);
+        ctx.arc(0, -80, 48, 0, Math.PI * 2);
         ctx.fill();
+        ctx.stroke();
+        ctx.restore();
 
         // Floor
-        ctx.fillStyle = "#2b211f";
-        ctx.fillRect(0, 380, 960, 160);
-
-        const drawSmith = (x, y, swing, shirt, dir) => {
-          const w = 48 * (1 + swing * 0.14);
-          const h = 68 * (1 - swing * 0.14);
-          ctx.fillStyle = shirt;
-          ctx.fillRect(x - w / 2, y - h, w, h);
-          ctx.fillStyle = "#f5d0b5";
-          ctx.beginPath();
-          ctx.arc(x, y - h - 20, 20, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#1c1c24";
-          ctx.beginPath();
-          ctx.arc(x + dir * 7, y - h - 23, 3.2, 0, Math.PI * 2);
-          ctx.fill();
-
-          const ang = (-1.1 + 1.45 * swing) * dir;
-          const sx0 = x + dir * 8;
-          const sy0 = y - h * 0.72;
-          const hx = sx0 + Math.cos(ang) * 48 * dir;
-          const hy = sy0 + Math.sin(ang) * 48 * dir;
-          ctx.strokeStyle = "#f5d0b5";
-          ctx.lineWidth = 8;
-          ctx.beginPath();
-          ctx.moveTo(sx0, sy0);
-          ctx.lineTo(hx, hy);
-          ctx.stroke();
-          ctx.fillStyle = "#8d94a3";
-          ctx.fillRect(hx - 12, hy - 10, 24, 20);
-        };
+        ctx.fillStyle = "#362826";
+        ctx.fillRect(0, 368, 960, 172);
+        ctx.strokeStyle = "#111116";
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.moveTo(0, 368);
+        ctx.lineTo(960, 368);
+        ctx.stroke();
 
         const drawAnvil = (x, y) => {
-          ctx.fillStyle = "#565e6b";
-          ctx.fillRect(x - 36, y - 16, 72, 20);
-          ctx.fillStyle = "#3e434d";
-          ctx.fillRect(x - 20, y + 4, 40, 24);
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.scale(bopX, bopY);
+          ctx.strokeStyle = "#111116";
+          ctx.lineWidth = 4.5;
+          ctx.fillStyle = "#677282";
+          ctx.fillRect(-40, -28, 80, 22);
+          ctx.strokeRect(-40, -28, 80, 22);
+          ctx.fillStyle = "#48505c";
+          ctx.fillRect(-20, -6, 40, 24);
+          ctx.strokeRect(-20, -6, 40, 24);
+          ctx.restore();
         };
 
-        drawSmith(260, 355, state.masterSwing, "#eb6b40", 1);
+        const drawSmith = (x, y, swing, windup, shirt, dir, mood) => {
+          ctx.save();
+          ctx.translate(x, y);
+          const sSwing = swing > 0 ? swing : 0;
+          const w = 52 * bopX * (1 + sSwing * 0.16);
+          const h = 72 * bopY * (1 - sSwing * 0.16);
+
+          ctx.strokeStyle = "#111116";
+          ctx.lineWidth = 4.5;
+
+          // Body
+          ctx.fillStyle = shirt;
+          ctx.fillRect(-w / 2, -h, w, h);
+          ctx.strokeRect(-w / 2, -h, w, h);
+
+          // Head
+          const hy = -h - 24;
+          ctx.fillStyle = "#ffd9bd";
+          ctx.beginPath();
+          ctx.arc(0, hy, 23, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Ko Takeuchi expressive eyes & brows!
+          ctx.fillStyle = "#111116";
+          if (mood === "sideeye") {
+            // Iconic Side-Eye Glare!
+            ctx.beginPath();
+            ctx.arc(8, hy - 3, 3.6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(-8, hy - 9);
+            ctx.lineTo(14, hy - 9);
+            ctx.stroke();
+          } else if (mood === "happy") {
+            ctx.beginPath();
+            ctx.arc(dir * 7, hy - 4, 4, Math.PI, 0);
+            ctx.stroke();
+          } else if (mood === "confused") {
+            ctx.beginPath();
+            ctx.moveTo(dir * 2, hy - 5);
+            ctx.lineTo(dir * 12, hy - 5);
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.arc(dir * 7, hy - 4, 3.6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Hammer Arm
+          const baseAng = windup > 0 ? -1.65 * dir : -1.05 * dir;
+          const ang = baseAng + 1.45 * dir * sSwing;
+          const sx0 = dir * 6;
+          const sy0 = -h * 0.7;
+          const hx = sx0 + Math.cos(ang) * 52 * dir;
+          const hy2 = sy0 + Math.sin(ang) * 52 * dir;
+
+          ctx.strokeStyle = "#111116";
+          ctx.lineWidth = 12;
+          ctx.beginPath();
+          ctx.moveTo(sx0, sy0);
+          ctx.lineTo(hx, hy2);
+          ctx.stroke();
+          ctx.strokeStyle = "#ffd9bd";
+          ctx.lineWidth = 6.5;
+          ctx.stroke();
+
+          ctx.fillStyle = "#959dad";
+          ctx.strokeStyle = "#111116";
+          ctx.lineWidth = 4;
+          ctx.fillRect(hx - 14, hy2 - 11, 28, 22);
+          ctx.strokeRect(hx - 14, hy2 - 11, 28, 22);
+
+          ctx.restore();
+        };
+
+        // Master (Left) & Player (Right)
         drawAnvil(335, 355);
-        drawSmith(700, 355, state.playerSwing, "#4bb8f5", -1);
+        drawSmith(245, 368, state.masterSwing, state.masterWindup, "#ff683b", 1, state.masterMood);
+
         drawAnvil(615, 355);
+        drawSmith(710, 368, state.playerSwing, 0, "#3db8ff", -1, "normal");
 
-        // Hot ingot
-        ctx.fillStyle = state.ingotHeat > 0.6 ? "#ffe885" : "#ff6b2b";
-        ctx.fillRect(592, 333, 46, 12);
+        // Ingot on Player Anvil
+        ctx.strokeStyle = "#111116";
+        ctx.lineWidth = 3.5;
+        if (state.ingotState === "flat") {
+          ctx.fillStyle = "#c95b38";
+          ctx.fillRect(584, 322, 62, 6);
+          ctx.strokeRect(584, 322, 62, 6);
+        } else if (state.ingotState === "miss") {
+          ctx.fillStyle = "#5c575c";
+          ctx.fillRect(598, 344, 34, 10);
+          ctx.strokeRect(598, 344, 34, 10);
+        } else {
+          ctx.fillStyle = state.ingotHeat > 0.6 ? "#fff078" : "#ff6b2b";
+          ctx.fillRect(590, 315, 50, 14);
+          ctx.strokeRect(590, 315, 50, 14);
+        }
 
-        // Sparks
+        // Flying Forged Swords
+        for (const sw of state.flyingSwords) {
+          ctx.save();
+          ctx.translate(sw.x, sw.y);
+          ctx.rotate(sw.rot);
+          ctx.fillStyle = sw.heavy ? "#ffbe3b" : "#d9f4ff";
+          ctx.strokeStyle = "#111116";
+          ctx.lineWidth = 3.5;
+          ctx.fillRect(-6, -34, 12, 50);
+          ctx.strokeRect(-6, -34, 12, 50);
+          ctx.fillStyle = "#e0842d";
+          ctx.fillRect(-14, 12, 28, 8);
+          ctx.strokeRect(-14, 12, 28, 8);
+          ctx.restore();
+        }
+
+        // Sparks & 4-Point Comic Stars
         for (const sp of state.sparks) {
           const a = Math.max(0, sp.life / 0.45);
-          ctx.fillStyle = `rgba(255, 210, 64, ${a})`;
+          ctx.fillStyle = sp.gold ? `rgba(255, 224, 66, ${a})` : `rgba(255, 160, 80, ${a})`;
           ctx.beginPath();
-          ctx.arc(sp.x, sp.y, 3.5 * a + 1, 0, Math.PI * 2);
+          ctx.arc(sp.x, sp.y, 4 * a + 1.5, 0, Math.PI * 2);
           ctx.fill();
+        }
+        for (const st of state.stars) {
+          const a = Math.max(0, st.life / 0.48);
+          ctx.save();
+          ctx.translate(st.x, st.y);
+          ctx.globalAlpha = a;
+          ctx.fillStyle = "#ffe84d";
+          ctx.strokeStyle = "#111116";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          const r = st.size;
+          ctx.moveTo(0, -r);
+          ctx.lineTo(r * 0.28, -r * 0.28);
+          ctx.lineTo(r, 0);
+          ctx.lineTo(r * 0.28, r * 0.28);
+          ctx.lineTo(0, r);
+          ctx.lineTo(-r * 0.28, r * 0.28);
+          ctx.lineTo(-r, 0);
+          ctx.lineTo(-r * 0.28, -r * 0.28);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Comic Radial Speed Lines on Ace Hit!
+        if (state.speedLines > 0.05) {
+          ctx.save();
+          ctx.strokeStyle = `rgba(255, 240, 140, ${state.speedLines * 0.55})`;
+          ctx.lineWidth = 3;
+          for (let i = 0; i < 12; i++) {
+            const a = (Math.PI * 2 * i) / 12 + 0.15;
+            ctx.beginPath();
+            ctx.moveTo(615 + Math.cos(a) * 55, 320 + Math.sin(a) * 55);
+            ctx.lineTo(615 + Math.cos(a) * 155, 320 + Math.sin(a) * 155);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        // Blackout Smoke Cloud (Visual Occlusion Gag!)
+        if (state.smokeAlpha > 0.02) {
+          ctx.save();
+          ctx.globalAlpha = state.smokeAlpha * 0.96;
+          ctx.fillStyle = "#2b2c38";
+          ctx.strokeStyle = "#111116";
+          ctx.lineWidth = 4;
+          const puffs = [[260, 290, 95], [380, 270, 110], [500, 295, 115], [620, 280, 110], [720, 305, 95]];
+          for (const [px, py, pr] of puffs) {
+            ctx.beginPath();
+            ctx.arc(px, py, pr, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+          ctx.fillStyle = "#ffd84d";
+          ctx.font = "bold 26px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("浓烟遮挡！闭眼听拍！", 480, 295);
+          ctx.restore();
         }
 
         ctx.restore();
@@ -229,11 +532,11 @@ window.createStageController = function createStageController(stageId) {
         ctx.fillStyle = "#fff2d6";
         ctx.font = "bold 24px sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText(state.banner, 480, 130);
+        ctx.fillText(state.banner, 480, 115);
         ctx.fillStyle = "#ffdc5c";
         ctx.font = "bold 20px sans-serif";
         ctx.textAlign = "left";
-        ctx.fillText(`成品名剑: ${state.swords}`, 30, 470);
+        ctx.fillText(`成品神兵: ${state.swords}`, 30, 470);
       },
     };
   }
@@ -271,11 +574,12 @@ window.createStageController = function createStageController(stageId) {
     return {
       cues,
       targets,
+      customHitAudio: false,
       scheduleCueAudio(cue, when) {
-        if (cue.kind === "count_in") AudioEngine.playTone(440, 0.08, "square", 0.14, when);
-        else if (cue.kind === "spawn_normal") AudioEngine.playTone(523.25, 0.09, "square", 0.16, when);
-        else if (cue.kind === "spawn_fast") AudioEngine.playTone(783.99, 0.09, "square", 0.18, when);
-        else if (cue.kind === "hop_beep") AudioEngine.playTone(cue.high ? 880 : 523.25, 0.08, "square", 0.16, when);
+        if (cue.kind === "count_in") AudioEngine.playTeacherCue(440, 1400, 0.08, when, false);
+        else if (cue.kind === "spawn_normal") AudioEngine.playTeacherCue(523.25, 1600, 0.09, when, false);
+        else if (cue.kind === "spawn_fast") AudioEngine.playTeacherCue(783.99, 2100, 0.09, when, true);
+        else if (cue.kind === "hop_beep") AudioEngine.playTeacherCue(cue.high ? 880 : 523.25, 1750, 0.08, when, cue.high);
       },
       onCueVisual(cue) {
         if (cue.kind === "count_in") state.banner = `开机准备... ${cue.num}`;
@@ -321,7 +625,6 @@ window.createStageController = function createStageController(stageId) {
         ctx.fillStyle = `rgb(${18 + beatPulse * 8}, ${28 + beatPulse * 10}, ${42 + beatPulse * 12})`;
         ctx.fillRect(0, 0, 960, 540);
 
-        // Belt
         ctx.fillStyle = "#3c4654";
         ctx.fillRect(100, beltY, 690, 28);
         ctx.fillStyle = "#262b36";
@@ -341,14 +644,12 @@ window.createStageController = function createStageController(stageId) {
           ctx.stroke();
         }
 
-        // Target Ring
         ctx.strokeStyle = `rgba(64, 216, 255, ${0.35 + beatPulse * 0.25})`;
         ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.arc(clawX, beltY - 26, 30, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Claw
         const clawY = 185 + (beltY - 46 - 185) * state.clawAnim;
         ctx.strokeStyle = "#a3b5cc";
         ctx.lineWidth = 10;
@@ -367,7 +668,6 @@ window.createStageController = function createStageController(stageId) {
         ctx.lineTo(clawX + spread, clawY + 26);
         ctx.stroke();
 
-        // Items
         for (const it of state.items) {
           let x = clawX;
           let y = beltY - 20;
@@ -441,11 +741,12 @@ window.createStageController = function createStageController(stageId) {
   return {
     cues,
     targets,
+    customHitAudio: false,
     scheduleCueAudio(cue, when) {
-      if (cue.kind === "count_in") AudioEngine.playTone(740, 0.1, "triangle", 0.2, when);
-      else if (cue.kind === "kid_sing") AudioEngine.playTone(cue.idx === 0 ? 261.63 : 329.63, 0.2, "sine", 0.3, when);
-      else if (cue.kind === "conductor_cue") AudioEngine.playTone(392.0, 0.2, "sine", 0.3, when);
-      else if (cue.kind === "tutti_prep") AudioEngine.playTone(880.0, 0.11, "triangle", 0.24, when);
+      if (cue.kind === "count_in") AudioEngine.playTeacherCue(740, 1600, 0.1, when, false);
+      else if (cue.kind === "kid_sing") AudioEngine.playTeacherCue(cue.idx === 0 ? 261.63 : 329.63, 1400, 0.2, when, false);
+      else if (cue.kind === "conductor_cue") AudioEngine.playTeacherCue(392.0, 1750, 0.2, when, false);
+      else if (cue.kind === "tutti_prep") AudioEngine.playTeacherCue(880.0, 2200, 0.11, when, true);
     },
     onCueVisual(cue) {
       if (cue.kind === "count_in") state.banner = `开嗓准备... ${cue.num}`;
@@ -499,7 +800,6 @@ window.createStageController = function createStageController(stageId) {
       ctx.fillStyle = `rgb(${36 + beatPulse * 12}, ${22 + beatPulse * 6}, ${40 + beatPulse * 12})`;
       ctx.fillRect(0, 0, 960, 540);
 
-      // Stage
       ctx.fillStyle = "#472b24";
       ctx.fillRect(100, 380, 760, 140);
       ctx.fillStyle = "#d9a347";

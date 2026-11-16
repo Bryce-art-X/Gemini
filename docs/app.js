@@ -38,6 +38,7 @@
   let nextHalfBeat = 0;
   let lastVisualBeat = -1;
   let beatPulse = 0;
+  let hitstopTimer = 0;
 
   let perfectCount = 0;
   let goodCount = 0;
@@ -91,11 +92,12 @@
     controller = window.createStageController(meta.id);
 
     beatSec = 60 / meta.bpm;
-    startTime = AudioEngine.now() + 0.12;
+    startTime = AudioEngine.now() + 0.14;
     lastFrameTime = performance.now();
     nextHalfBeat = 0;
     lastVisualBeat = -1;
     beatPulse = 0;
+    hitstopTimer = 0;
 
     perfectCount = 0;
     goodCount = 0;
@@ -138,7 +140,7 @@
     judgePopup.textContent = text;
     judgePopup.style.color = color;
     judgePopup.classList.remove("hidden");
-    judgePopup.style.transform = "translateX(-50%) scale(1.22)";
+    judgePopup.style.transform = "translateX(-50%) scale(1.25)";
     requestAnimationFrame(() => {
       judgePopup.style.transform = "translateX(-50%) scale(1)";
     });
@@ -189,22 +191,28 @@
     }
 
     bestTarget.judged = true;
+    const timingCtx = { startTime, beatSec };
     if (bestErr <= PERFECT_WIN) {
       perfectCount += 1;
       combo += 1;
       maxCombo = Math.max(maxCombo, combo);
       updateCombo();
-      showJudge("PERFECT!", "#ffd938");
-      AudioEngine.playChord([523.25, 659.25, 783.99], 0.15, "triangle", 0.22);
-      controller.onHit(bestTarget, "perfect");
+      showJudge("ACE!", "#ffd938");
+      hitstopTimer = 0.045; // 3-frame hitstop!
+      if (!controller.customHitAudio) {
+        AudioEngine.playQuantizedChord([523.25, 659.25, 783.99], startTime, beatSec, 0.16, 0.22);
+      }
+      controller.onHit(bestTarget, "perfect", timingCtx);
     } else if (bestErr <= GOOD_WIN) {
       goodCount += 1;
       combo += 1;
       maxCombo = Math.max(maxCombo, combo);
       updateCombo();
-      showJudge("GOOD", "#70eb8c");
-      AudioEngine.playTone(440, 0.1, "triangle", 0.2);
-      controller.onHit(bestTarget, "good");
+      showJudge("BARELY", "#9ce868");
+      if (!controller.customHitAudio) {
+        AudioEngine.playTone(440, 0.1, "triangle", 0.2);
+      }
+      controller.onHit(bestTarget, "good", timingCtx);
     } else {
       registerMiss(bestTarget);
     }
@@ -225,13 +233,13 @@
 
     resultRank.textContent = rank.text;
     resultRank.style.color = rank.color;
-    resultStats.textContent = `准确度：${acc.toFixed(1)}%\nPERFECT: ${perfectCount}   GOOD: ${goodCount}   MISS: ${missCount}\n最大连击：${maxCombo}`;
+    resultStats.textContent = `准确度：${acc.toFixed(1)}%\nACE: ${perfectCount}   BARELY: ${goodCount}   MISS: ${missCount}\n最大连击：${maxCombo}`;
     resultOverlay.classList.remove("hidden");
   }
 
   function loop(ts) {
     if (!isRunning) return;
-    const dt = Math.min(0.05, (ts - lastFrameTime) / 1000);
+    const rawDt = Math.min(0.05, (ts - lastFrameTime) / 1000);
     lastFrameTime = ts;
 
     const audioNow = AudioEngine.now();
@@ -239,12 +247,14 @@
     const curSec = audioNow - startTime - offsetSec;
     const currentBeat = curSec / beatSec;
 
-    // 1. Sample-accurate lookahead audio scheduling
+    // 1. Sample-accurate lookahead audio scheduling + Missing Instrument check
     const scheduleHorizonBeat = (audioNow + LOOKAHEAD_SEC - startTime) / beatSec;
     while (nextHalfBeat * 0.5 <= scheduleHorizonBeat && nextHalfBeat * 0.5 < activeMeta.totalBeats) {
-      const exactTime = startTime + nextHalfBeat * 0.5 * beatSec;
+      const halfBeatVal = nextHalfBeat * 0.5;
+      const exactTime = startTime + halfBeatVal * beatSec;
+      const hasTarget = controller.targets.some((t) => Math.abs(t.beat - halfBeatVal) < 0.08);
       if (exactTime >= audioNow - 0.02) {
-        AudioEngine.scheduleBackingHalfBeat(nextHalfBeat, beatSec, activeMeta.id, exactTime);
+        AudioEngine.scheduleBackingHalfBeat(nextHalfBeat, beatSec, activeMeta.id, exactTime, hasTarget);
       }
       nextHalfBeat += 1;
     }
@@ -254,7 +264,7 @@
         cue.audioScheduled = true;
         const exactTime = startTime + cue.beat * beatSec;
         if (exactTime >= audioNow - 0.02) {
-          controller.scheduleCueAudio(cue, exactTime);
+          controller.scheduleCueAudio(cue, exactTime, beatSec);
         }
       }
       if (!cue.triggered && currentBeat >= cue.beat) {
@@ -271,16 +281,20 @@
       }
     }
 
-    // 3. Beat pulse & progress
+    // 3. Beat pulse & Hitstop
     const beatIdx = Math.floor(currentBeat);
     if (beatIdx > lastVisualBeat && beatIdx >= 0) {
       lastVisualBeat = beatIdx;
       beatPulse = 1;
     }
-    beatPulse = Math.max(0, beatPulse - dt * 4.5);
+    beatPulse = Math.max(0, beatPulse - rawDt * 5.0);
     hudProgress.style.width = `${Math.max(0, Math.min(100, (currentBeat / activeMeta.totalBeats) * 100))}%`;
 
-    controller.update(dt);
+    if (hitstopTimer > 0) {
+      hitstopTimer = Math.max(0, hitstopTimer - rawDt);
+    } else {
+      controller.update(rawDt, currentBeat);
+    }
     controller.draw(ctx, beatPulse, currentBeat);
 
     if (currentBeat >= activeMeta.totalBeats) {
@@ -291,7 +305,6 @@
     rafId = requestAnimationFrame(loop);
   }
 
-  // Input listeners (pointerdown for zero-latency mobile touch + keyboard)
   tapPad.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     handleTap();
