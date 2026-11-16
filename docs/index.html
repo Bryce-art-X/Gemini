@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>节奏天国 · 迷你合集 (Web)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- 主菜单 -->
+    <section id="menu-screen" class="screen active">
+      <header class="menu-header">
+        <h1>节奏天国 · 迷你合集</h1>
+        <p class="subtitle">听音辨拍 · 手机点击屏幕 / 电脑按 Space 或 J</p>
+      </header>
+
+      <div id="stage-cards" class="stage-cards"></div>
+
+      <footer class="menu-footer">
+        <label for="offset-slider">音频延迟校准：<strong id="offset-value">0 ms</strong></label>
+        <input id="offset-slider" type="range" min="-120" max="120" step="5" value="0" />
+      </footer>
+    </section>
+
+    <!-- 游戏界面 -->
+    <section id="game-screen" class="screen">
+      <header class="game-hud">
+        <div class="hud-left">
+          <span id="hud-title" class="hud-title">铁匠打铁</span>
+          <span id="hud-bpm" class="hud-bpm">115 BPM</span>
+        </div>
+        <div class="progress-wrap">
+          <div id="hud-progress" class="progress-bar"></div>
+        </div>
+        <div class="hud-right">
+          <span id="hud-combo" class="hud-combo hidden">0 COMBO</span>
+          <button id="btn-back" class="btn-small" type="button">选关</button>
+        </div>
+      </header>
+
+      <div class="canvas-wrap">
+        <canvas id="game-canvas" width="960" height="540"></canvas>
+        <div id="judge-popup" class="judge-popup hidden">PERFECT!</div>
+      </div>
+
+      <div id="tap-pad" class="tap-pad">
+        <span>点击这里打拍 (TAP / SPACE)</span>
+      </div>
+
+      <!-- 结算弹窗 -->
+      <div id="result-overlay" class="result-overlay hidden">
+        <div class="result-card">
+          <h2>演出结束！</h2>
+          <div id="result-rank" class="result-rank">超棒! Superb</div>
+          <p id="result-stats" class="result-stats"></p>
+          <div class="result-actions">
+            <button id="btn-retry" class="btn-primary" type="button">再玩一次</button>
+            <button id="btn-menu" class="btn-secondary" type="button">返回选关</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="stages.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
