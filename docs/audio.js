@@ -9,29 +9,32 @@ window.AudioEngine = (() => {
   let loaded = false;
 
   const ASSET_URLS = {
-    bgm_main: "assets/audio/bgm_main.mp3?v=6",
-    bgm_title: "assets/audio/bgm_title.mp3?v=6",
-    cue_hit_1: "assets/audio/cue_hit_1.wav?v=6",
-    cue_hit_2: "assets/audio/cue_hit_2.wav?v=6",
-    cue_hit_3: "assets/audio/cue_hit_3.wav?v=6",
-    cue_lob: "assets/audio/cue_lob.wav?v=6",
-    sfx_ace: "assets/audio/sfx_hit_ace.wav?v=6",
-    sfx_heavy: "assets/audio/sfx_hit_heavy.wav?v=6",
-    sfx_barely: "assets/audio/sfx_hit_barely.wav?v=6",
-    sfx_miss: "assets/audio/sfx_miss.wav?v=6",
-    sfx_bonk: "assets/audio/sfx_bonk.wav?v=6",
-    sfx_bulb_snap: "assets/audio/sfx_bulb_snap.wav?v=6",
-    sfx_power_off: "assets/audio/sfx_power_off.wav?v=6",
-    sfx_power_on: "assets/audio/sfx_power_on.wav?v=6",
-    sfx_sword_fly: "assets/audio/sfx_sword_fly.wav?v=6",
-    chord_0: "assets/audio/chord_0.wav?v=6",
-    chord_1: "assets/audio/chord_1.wav?v=6",
-    chord_2: "assets/audio/chord_2.wav?v=6",
-    chord_3: "assets/audio/chord_3.wav?v=6",
-    chord_4: "assets/audio/chord_4.wav?v=6",
-    chord_5: "assets/audio/chord_5.wav?v=6",
-    chord_6: "assets/audio/chord_6.wav?v=6",
-    chord_7: "assets/audio/chord_7.wav?v=6",
+    bgm_main: "assets/audio/bgm_main.mp3?v=7",
+    bgm_title: "assets/audio/bgm_title.mp3?v=7",
+    cue_step_1: "assets/audio/cue_step_1.wav?v=7",
+    cue_step_2: "assets/audio/cue_step_2.wav?v=7",
+    cue_step_3: "assets/audio/cue_step_3.wav?v=7",
+    cue_count: "assets/audio/cue_count.wav?v=7",
+    cue_cough: "assets/audio/cue_cough.wav?v=7",
+    cue_hmm: "assets/audio/cue_hmm.wav?v=7",
+    cue_turnaround: "assets/audio/cue_turnaround.wav?v=7",
+    sfx_type_ace: "assets/audio/sfx_type_ace.wav?v=7",
+    sfx_type_clack: "assets/audio/sfx_type_clack.wav?v=7",
+    sfx_empty_tap: "assets/audio/sfx_empty_tap.wav?v=7",
+    sfx_crunch: "assets/audio/sfx_crunch.wav?v=7",
+    sfx_barely: "assets/audio/sfx_barely.wav?v=7",
+    sfx_caught_stamp: "assets/audio/sfx_caught_stamp.wav?v=7",
+    sfx_power_off: "assets/audio/sfx_power_off.wav?v=7",
+    sfx_power_on: "assets/audio/sfx_power_on.wav?v=7",
+    sfx_bell_1800: "assets/audio/sfx_bell_1800.wav?v=7",
+    chord_0: "assets/audio/chord_0.wav?v=7",
+    chord_1: "assets/audio/chord_1.wav?v=7",
+    chord_2: "assets/audio/chord_2.wav?v=7",
+    chord_3: "assets/audio/chord_3.wav?v=7",
+    chord_4: "assets/audio/chord_4.wav?v=7",
+    chord_5: "assets/audio/chord_5.wav?v=7",
+    chord_6: "assets/audio/chord_6.wav?v=7",
+    chord_7: "assets/audio/chord_7.wav?v=7",
   };
 
   function ensureContext() {
@@ -47,7 +50,7 @@ window.AudioEngine = (() => {
       cueGain.gain.value = 1.0;
       if (ctx.createStereoPanner) {
         const p = ctx.createStereoPanner();
-        p.pan.value = -0.32;
+        p.pan.value = 0.28; // Boss footsteps & doorway on the right
         cueGain.connect(p);
         p.connect(ctx.destination);
       } else {
@@ -58,7 +61,7 @@ window.AudioEngine = (() => {
       playerGain.gain.value = 1.0;
       if (ctx.createStereoPanner) {
         const p = ctx.createStereoPanner();
-        p.pan.value = 0.25;
+        p.pan.value = -0.22; // Desk, keyboard & snacks on the left
         playerGain.connect(p);
         p.connect(ctx.destination);
       } else {
@@ -85,7 +88,6 @@ window.AudioEngine = (() => {
     if (c.state === "suspended") {
       await c.resume();
     }
-    // Decode any pending raw buffers
     const keys = Object.keys(rawBytes);
     await Promise.all(
       keys.map(async (k) => {
@@ -106,8 +108,8 @@ window.AudioEngine = (() => {
     const t = when ?? ctx.currentTime;
     bgmGain.gain.cancelScheduledValues(t);
     bgmGain.gain.setValueAtTime(bgmGain.gain.value, t);
-    bgmGain.gain.linearRampToValueAtTime(0.22, t + 0.003);
-    bgmGain.gain.linearRampToValueAtTime(0.88, t + 0.003 + holdSec);
+    bgmGain.gain.linearRampToValueAtTime(0.24, t + 0.004);
+    bgmGain.gain.linearRampToValueAtTime(0.88, t + 0.004 + holdSec);
   }
 
   function startBGM(key, when, loop = false) {

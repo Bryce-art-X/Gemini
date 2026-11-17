@@ -1,0 +1,1187 @@
+{
+  "id": "office_slacker",
+  "title": "社畜摸鱼防老板！Office Slacker!",
+  "bpm": 118.0,
+  "total_beats": 144,
+  "cues": [
+    {
+      "beat": 4.0,
+      "kind": "count_in",
+      "num": 4
+    },
+    {
+      "beat": 5.0,
+      "kind": "count_in",
+      "num": 3
+    },
+    {
+      "beat": 6.0,
+      "kind": "count_in",
+      "num": 2
+    },
+    {
+      "beat": 7.0,
+      "kind": "count_in",
+      "num": 1
+    },
+    {
+      "beat": 8.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 8.0,
+      "hit_beat": 11.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 9.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 8.0,
+      "hit_beat": 11.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 10.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 8.0,
+      "hit_beat": 11.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 11.0,
+      "kind": "boss_peek",
+      "duration": 0.9,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 12.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 12.0,
+      "hit_beat": 15.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 13.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 12.0,
+      "hit_beat": 15.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 14.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 12.0,
+      "hit_beat": 15.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 15.0,
+      "kind": "boss_peek",
+      "duration": 0.9,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 16.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 16.0,
+      "hit_beat": 19.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 17.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 16.0,
+      "hit_beat": 19.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 18.0,
+      "kind": "cough",
+      "spawn_beat": 16.0,
+      "hit_beat": 19.0,
+      "hold_beats": 3.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 19.0,
+      "kind": "boss_stare",
+      "duration": 3.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 21.0,
+      "kind": "hmm_leave",
+      "hit_beat": 22.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 24.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 24.0,
+      "hit_beat": 27.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 25.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 24.0,
+      "hit_beat": 27.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 26.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 24.0,
+      "hit_beat": 27.0,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 27.0,
+      "kind": "boss_peek",
+      "duration": 0.45,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 27.5,
+      "kind": "turnaround",
+      "hit_beat": 28.5,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 28.5,
+      "kind": "boss_peek",
+      "duration": 0.85,
+      "is_offbeat": true,
+      "practice": true,
+      "blind": false
+    },
+    {
+      "beat": 30.0,
+      "kind": "practice_done"
+    },
+    {
+      "beat": 32.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 32.0,
+      "hit_beat": 35.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 33.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 32.0,
+      "hit_beat": 35.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 34.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 32.0,
+      "hit_beat": 35.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 35.0,
+      "kind": "boss_peek",
+      "duration": 0.9,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 36.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 36.0,
+      "hit_beat": 39.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 37.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 36.0,
+      "hit_beat": 39.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 38.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 36.0,
+      "hit_beat": 39.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 39.0,
+      "kind": "boss_peek",
+      "duration": 0.9,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 40.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 40.0,
+      "hit_beat": 43.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 41.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 40.0,
+      "hit_beat": 43.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 42.0,
+      "kind": "cough",
+      "spawn_beat": 40.0,
+      "hit_beat": 43.0,
+      "hold_beats": 3.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 43.0,
+      "kind": "boss_stare",
+      "duration": 3.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 45.0,
+      "kind": "hmm_leave",
+      "hit_beat": 46.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 48.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 48.0,
+      "hit_beat": 51.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 49.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 48.0,
+      "hit_beat": 51.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 50.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 48.0,
+      "hit_beat": 51.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 51.0,
+      "kind": "boss_peek",
+      "duration": 0.45,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 51.5,
+      "kind": "turnaround",
+      "hit_beat": 52.5,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 52.5,
+      "kind": "boss_peek",
+      "duration": 0.85,
+      "is_offbeat": true,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 56.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 56.0,
+      "hit_beat": 59.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 57.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 56.0,
+      "hit_beat": 59.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 58.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 56.0,
+      "hit_beat": 59.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 59.0,
+      "kind": "boss_peek",
+      "duration": 0.9,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 64.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 64.0,
+      "hit_beat": 67.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 65.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 64.0,
+      "hit_beat": 67.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 66.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 64.0,
+      "hit_beat": 67.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 67.0,
+      "kind": "boss_peek",
+      "duration": 0.9,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 68.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 68.0,
+      "hit_beat": 71.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 69.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 68.0,
+      "hit_beat": 71.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 70.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 68.0,
+      "hit_beat": 71.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 71.0,
+      "kind": "boss_peek",
+      "duration": 0.9,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 72.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 72.0,
+      "hit_beat": 75.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 73.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 72.0,
+      "hit_beat": 75.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 74.0,
+      "kind": "cough",
+      "spawn_beat": 72.0,
+      "hit_beat": 75.0,
+      "hold_beats": 3.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 75.0,
+      "kind": "boss_stare",
+      "duration": 3.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 77.0,
+      "kind": "hmm_leave",
+      "hit_beat": 78.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 80.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 80.0,
+      "hit_beat": 83.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 81.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 80.0,
+      "hit_beat": 83.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 82.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 80.0,
+      "hit_beat": 83.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 83.0,
+      "kind": "boss_peek",
+      "duration": 0.45,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 83.5,
+      "kind": "turnaround",
+      "hit_beat": 84.5,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 84.5,
+      "kind": "boss_peek",
+      "duration": 0.85,
+      "is_offbeat": true,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 88.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 88.0,
+      "hit_beat": 91.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 89.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 88.0,
+      "hit_beat": 91.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 90.0,
+      "kind": "cough",
+      "spawn_beat": 88.0,
+      "hit_beat": 91.0,
+      "hold_beats": 3.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 91.0,
+      "kind": "boss_stare",
+      "duration": 3.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 93.0,
+      "kind": "hmm_leave",
+      "hit_beat": 94.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 96.0,
+      "kind": "blackout_on"
+    },
+    {
+      "beat": 96.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 96.0,
+      "hit_beat": 99.0,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 97.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 96.0,
+      "hit_beat": 99.0,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 98.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 96.0,
+      "hit_beat": 99.0,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 99.0,
+      "kind": "boss_peek",
+      "duration": 0.9,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 100.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 100.0,
+      "hit_beat": 103.0,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 101.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 100.0,
+      "hit_beat": 103.0,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 102.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 100.0,
+      "hit_beat": 103.0,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 103.0,
+      "kind": "boss_peek",
+      "duration": 0.9,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 104.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 104.0,
+      "hit_beat": 107.0,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 105.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 104.0,
+      "hit_beat": 107.0,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 106.0,
+      "kind": "cough",
+      "spawn_beat": 104.0,
+      "hit_beat": 107.0,
+      "hold_beats": 3.0,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 107.0,
+      "kind": "boss_stare",
+      "duration": 3.0,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 109.0,
+      "kind": "hmm_leave",
+      "hit_beat": 110.0,
+      "practice": false,
+      "blind": true
+    },
+    {
+      "beat": 112.0,
+      "kind": "blackout_off"
+    },
+    {
+      "beat": 112.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 112.0,
+      "hit_beat": 115.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 113.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 112.0,
+      "hit_beat": 115.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 114.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 112.0,
+      "hit_beat": 115.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 115.0,
+      "kind": "boss_peek",
+      "duration": 0.45,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 115.5,
+      "kind": "turnaround",
+      "hit_beat": 116.5,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 116.5,
+      "kind": "boss_peek",
+      "duration": 0.85,
+      "is_offbeat": true,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 120.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 120.0,
+      "hit_beat": 123.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 121.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 120.0,
+      "hit_beat": 123.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 122.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 120.0,
+      "hit_beat": 123.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 123.0,
+      "kind": "boss_peek",
+      "duration": 0.9,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 124.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 124.0,
+      "hit_beat": 127.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 125.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 124.0,
+      "hit_beat": 127.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 126.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 124.0,
+      "hit_beat": 127.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 127.0,
+      "kind": "boss_peek",
+      "duration": 0.9,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 128.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 128.0,
+      "hit_beat": 131.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 129.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 128.0,
+      "hit_beat": 131.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 130.0,
+      "kind": "cough",
+      "spawn_beat": 128.0,
+      "hit_beat": 131.0,
+      "hold_beats": 3.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 131.0,
+      "kind": "boss_stare",
+      "duration": 3.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 133.0,
+      "kind": "hmm_leave",
+      "hit_beat": 134.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 136.0,
+      "kind": "step",
+      "step": 1,
+      "spawn_beat": 136.0,
+      "hit_beat": 139.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 137.0,
+      "kind": "step",
+      "step": 2,
+      "spawn_beat": 136.0,
+      "hit_beat": 139.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 138.0,
+      "kind": "step",
+      "step": 3,
+      "spawn_beat": 136.0,
+      "hit_beat": 139.0,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 139.0,
+      "kind": "boss_peek",
+      "duration": 0.45,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 139.5,
+      "kind": "turnaround",
+      "hit_beat": 140.5,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 140.5,
+      "kind": "boss_peek",
+      "duration": 0.85,
+      "is_offbeat": true,
+      "practice": false,
+      "blind": false
+    },
+    {
+      "beat": 142.0,
+      "kind": "bell_1800"
+    }
+  ],
+  "targets": [
+    {
+      "beat": 11.0,
+      "spawn_beat": 8.0,
+      "kind": "patrol",
+      "practice": true,
+      "blind": false,
+      "chord_idx": 2
+    },
+    {
+      "beat": 15.0,
+      "spawn_beat": 12.0,
+      "kind": "patrol",
+      "practice": true,
+      "blind": false,
+      "chord_idx": 3
+    },
+    {
+      "beat": 19.0,
+      "spawn_beat": 16.0,
+      "kind": "hold_start",
+      "end_beat": 22.0,
+      "practice": true,
+      "blind": false,
+      "chord_idx": 4
+    },
+    {
+      "beat": 22.0,
+      "spawn_beat": 21.0,
+      "kind": "hold_release",
+      "start_beat": 19.0,
+      "practice": true,
+      "blind": false,
+      "chord_idx": 1
+    },
+    {
+      "beat": 27.0,
+      "spawn_beat": 24.0,
+      "kind": "patrol",
+      "practice": true,
+      "blind": false,
+      "chord_idx": 5
+    },
+    {
+      "beat": 28.5,
+      "spawn_beat": 27.5,
+      "kind": "offbeat",
+      "practice": true,
+      "blind": false,
+      "chord_idx": 6
+    },
+    {
+      "beat": 35.0,
+      "spawn_beat": 32.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 0
+    },
+    {
+      "beat": 39.0,
+      "spawn_beat": 36.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 2
+    },
+    {
+      "beat": 43.0,
+      "spawn_beat": 40.0,
+      "kind": "hold_start",
+      "end_beat": 46.0,
+      "practice": false,
+      "blind": false,
+      "chord_idx": 4
+    },
+    {
+      "beat": 46.0,
+      "spawn_beat": 45.0,
+      "kind": "hold_release",
+      "start_beat": 43.0,
+      "practice": false,
+      "blind": false,
+      "chord_idx": 5
+    },
+    {
+      "beat": 51.0,
+      "spawn_beat": 48.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 0
+    },
+    {
+      "beat": 52.5,
+      "spawn_beat": 51.5,
+      "kind": "offbeat",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 2
+    },
+    {
+      "beat": 59.0,
+      "spawn_beat": 56.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 4
+    },
+    {
+      "beat": 67.0,
+      "spawn_beat": 64.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 0
+    },
+    {
+      "beat": 71.0,
+      "spawn_beat": 68.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 1
+    },
+    {
+      "beat": 75.0,
+      "spawn_beat": 72.0,
+      "kind": "hold_start",
+      "end_beat": 78.0,
+      "practice": false,
+      "blind": false,
+      "chord_idx": 2
+    },
+    {
+      "beat": 78.0,
+      "spawn_beat": 77.0,
+      "kind": "hold_release",
+      "start_beat": 75.0,
+      "practice": false,
+      "blind": false,
+      "chord_idx": 3
+    },
+    {
+      "beat": 83.0,
+      "spawn_beat": 80.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 4
+    },
+    {
+      "beat": 84.5,
+      "spawn_beat": 83.5,
+      "kind": "offbeat",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 1
+    },
+    {
+      "beat": 91.0,
+      "spawn_beat": 88.0,
+      "kind": "hold_start",
+      "end_beat": 94.0,
+      "practice": false,
+      "blind": false,
+      "chord_idx": 5
+    },
+    {
+      "beat": 94.0,
+      "spawn_beat": 93.0,
+      "kind": "hold_release",
+      "start_beat": 91.0,
+      "practice": false,
+      "blind": false,
+      "chord_idx": 6
+    },
+    {
+      "beat": 99.0,
+      "spawn_beat": 96.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": true,
+      "chord_idx": 5
+    },
+    {
+      "beat": 103.0,
+      "spawn_beat": 100.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": true,
+      "chord_idx": 5
+    },
+    {
+      "beat": 107.0,
+      "spawn_beat": 104.0,
+      "kind": "hold_start",
+      "end_beat": 110.0,
+      "practice": false,
+      "blind": true,
+      "chord_idx": 4
+    },
+    {
+      "beat": 110.0,
+      "spawn_beat": 109.0,
+      "kind": "hold_release",
+      "start_beat": 107.0,
+      "practice": false,
+      "blind": true,
+      "chord_idx": 1
+    },
+    {
+      "beat": 115.0,
+      "spawn_beat": 112.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 5
+    },
+    {
+      "beat": 116.5,
+      "spawn_beat": 115.5,
+      "kind": "offbeat",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 1
+    },
+    {
+      "beat": 123.0,
+      "spawn_beat": 120.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 0
+    },
+    {
+      "beat": 127.0,
+      "spawn_beat": 124.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 1
+    },
+    {
+      "beat": 131.0,
+      "spawn_beat": 128.0,
+      "kind": "hold_start",
+      "end_beat": 134.0,
+      "practice": false,
+      "blind": false,
+      "chord_idx": 2
+    },
+    {
+      "beat": 134.0,
+      "spawn_beat": 133.0,
+      "kind": "hold_release",
+      "start_beat": 131.0,
+      "practice": false,
+      "blind": false,
+      "chord_idx": 3
+    },
+    {
+      "beat": 139.0,
+      "spawn_beat": 136.0,
+      "kind": "patrol",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 4
+    },
+    {
+      "beat": 140.5,
+      "spawn_beat": 139.5,
+      "kind": "offbeat",
+      "practice": false,
+      "blind": false,
+      "chord_idx": 7
+    }
+  ]
+}

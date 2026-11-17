@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>铁匠传球！Forge Pass!</title>
-  <link rel="stylesheet" href="style.css?v=6" />
+  <title>社畜摸鱼防老板！Office Slacker!</title>
+  <link rel="stylesheet" href="style.css?v=7" />
 </head>
 <body>
   <div id="app">
@@ -14,13 +14,13 @@
       <canvas id="title-canvas" class="title-canvas" width="1280" height="720"></canvas>
       <div class="title-bg"></div>
       <div class="title-card">
-        <div class="title-badge">RHYTHM FORGE • 120 BPM</div>
-        <h1>铁匠传球！</h1>
-        <p class="title-sub">FORGE PASS! — 看飞铁弧线 · 听木鱼风箱 · 一锤定音</p>
-        <p id="title-record" class="title-record">操作：点击屏幕 / Space / J</p>
-        <div id="loading-bar" class="loading-bar">正在加载母带音频与美术资产...</div>
+        <div class="title-badge">17:58 RHYTHM OFFICE • 118 BPM</div>
+        <h1>社畜摸鱼防老板！</h1>
+        <p class="title-sub">OFFICE SLACKER! — 听脚步切表格 · 咳声长按装加班 · 撑到18:00下班</p>
+        <p id="title-record" class="title-record">操作：按住 / 轻点屏幕 或 Space / J</p>
+        <div id="loading-bar" class="loading-bar">正在加载复古像素美术与音频母带...</div>
         <div class="title-actions">
-          <button id="btn-play" class="btn-cartoon btn-gold" type="button" disabled>加载中...</button>
+          <button id="btn-play" class="btn-cartoon btn-green" type="button" disabled>加载中...</button>
           <button id="btn-calibrate" class="btn-cartoon btn-blue" type="button">延迟校准 (0 ms)</button>
         </div>
       </div>
@@ -29,8 +29,8 @@
       <div id="cal-overlay" class="modal-overlay hidden">
         <div class="modal-card">
           <h2>音频延迟校准</h2>
-          <p id="cal-status" class="cal-status">跟着木鱼鼓点点击下方按钮 4 次</p>
-          <button id="btn-cal-tap" class="btn-cartoon btn-gold" type="button">跟着节拍点我！(Space)</button>
+          <p id="cal-status" class="cal-status">跟着老板脚步拍点击下方按钮 4 次</p>
+          <button id="btn-cal-tap" class="btn-cartoon btn-gold" type="button">跟着脚步点我！(Space)</button>
           <input id="cal-slider" type="range" min="-120" max="120" step="5" value="0" />
           <button id="btn-cal-close" class="btn-cartoon btn-green" type="button">完成并返回</button>
         </div>
@@ -40,41 +40,40 @@
     <!-- 游戏界面 -->
     <section id="game-screen" class="screen">
       <header class="game-hud">
-        <span id="practice-pill" class="practice-pill">热身练习 (不计分)</span>
+        <span id="practice-pill" class="practice-pill">热身演练 (不计分)</span>
         <div class="progress-wrap">
           <div id="hud-progress" class="progress-bar"></div>
         </div>
-        <span id="hud-combo" class="hud-combo hidden">0 COMBO</span>
-        <button id="btn-back" class="btn-small" type="button">封面</button>
+        <span id="hud-combo" class="hud-combo hidden">0 连摸!</span>
+        <button id="btn-back" class="btn-small" type="button">✕ 退出</button>
       </header>
 
       <div class="canvas-wrap">
         <canvas id="game-canvas" width="1280" height="720"></canvas>
-        <div id="judge-popup" class="judge-popup hidden">ACE!</div>
       </div>
 
       <div id="tap-pad" class="tap-pad">
-        <span>点击打铁！(TAP / SPACE)</span>
+        <span>轻点切屏 / 长按装加班 (SPACE / TOUCH)</span>
       </div>
 
-      <!-- 铁匠铺周刊结算卡 -->
+      <!-- 18:00 HR 考勤日报结算卡 -->
       <div id="result-overlay" class="modal-overlay hidden">
         <div class="paper-card">
-          <div class="paper-hdr">— 铁匠铺周刊 · 演出日报 —</div>
-          <div id="result-rank" class="result-rank">超棒! Superb</div>
+          <div class="paper-hdr">— 18:00 考勤日报 · HR 摸鱼绩效 —</div>
+          <div id="result-rank" class="result-rank">按时下班! Superb</div>
           <p id="result-headline" class="result-headline"></p>
           <p id="result-stats" class="result-stats"></p>
           <div class="result-actions">
-            <button id="btn-retry" class="btn-cartoon btn-gold" type="button">再锻一次</button>
-            <button id="btn-menu" class="btn-cartoon btn-blue" type="button">返回封面</button>
+            <button id="btn-retry" class="btn-cartoon btn-green" type="button">再摸一天 ↻</button>
+            <button id="btn-menu" class="btn-cartoon btn-blue" type="button">下班回家</button>
           </div>
         </div>
       </div>
     </section>
   </div>
 
-  <script src="painter.js?v=6"></script>
-  <script src="audio.js?v=6"></script>
-  <script src="app.js?v=6"></script>
+  <script src="office_painter.js?v=7"></script>
+  <script src="audio.js?v=7"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

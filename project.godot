@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="铁匠传球！Forge Pass!"
+config/name="社畜摸鱼防老板！Office Slacker!"
 run/main_scene="res://scenes/title_screen.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
@@ -41,6 +41,7 @@ rhythm_hit={
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.0980392, 0.105882, 0.14902, 1)

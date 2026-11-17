@@ -1,5 +1,7 @@
 extends Control
 
+const TITLE_BEAT_SEC := 60.0 / 118.0
+
 var _bgm_player: AudioStreamPlayer
 var _sfx_player: AudioStreamPlayer
 var _sfx_cue: AudioStreamWAV
@@ -25,8 +27,8 @@ var _cal_last_beat: int = -1
 func _ready() -> void:
 	_is_headless = DisplayServer.get_name() == "headless"
 	theme = UITheme.make_theme()
-	_sfx_cue = load("res://assets/audio/cue_hit_2.wav")
-	_sfx_tap = load("res://assets/audio/sfx_hit_ace.wav")
+	_sfx_cue = load("res://assets/audio/cue_step_3.wav")
+	_sfx_tap = load("res://assets/audio/sfx_type_ace.wav")
 
 	_bgm_player = AudioStreamPlayer.new()
 	var title_stream: AudioStream = load("res://assets/audio/bgm_title.ogg")
@@ -46,12 +48,13 @@ func _ready() -> void:
 
 func _build_scene() -> void:
 	_stage_canvas = Node2D.new()
+	_stage_canvas.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_stage_canvas.draw.connect(_draw_live_backdrop)
 	add_child(_stage_canvas)
 
 	var tint := ColorRect.new()
 	tint.set_anchors_preset(Control.PRESET_FULL_RECT)
-	tint.color = Color(0.06, 0.04, 0.05, 0.35)
+	tint.color = Color(0.05, 0.06, 0.10, 0.42)
 	tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(tint)
 
@@ -60,8 +63,8 @@ func _build_scene() -> void:
 	add_child(center)
 
 	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(620, 0)
-	UITheme.style_card(card, Color(0.14, 0.13, 0.20, 0.92), Color(1.0, 0.80, 0.26))
+	card.custom_minimum_size = Vector2(640, 0)
+	UITheme.style_card(card, Color(0.11, 0.13, 0.19, 0.92), Color(0.32, 0.88, 0.56))
 	center.add_child(card)
 
 	var title_box := VBoxContainer.new()
@@ -70,37 +73,37 @@ func _build_scene() -> void:
 	card.add_child(title_box)
 
 	var badge := Label.new()
-	badge.text = "RHYTHM FORGE • 120 BPM"
+	badge.text = "17:58 RHYTHM OFFICE • 118 BPM"
 	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	badge.add_theme_font_size_override("font_size", 16)
-	badge.modulate = Color(1.0, 0.82, 0.34)
+	badge.modulate = Color(0.45, 0.95, 0.65)
 	title_box.add_child(badge)
 
 	var title := Label.new()
-	title.text = "铁匠传球！"
+	title.text = "社畜摸鱼防老板！"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 56)
-	title.add_theme_color_override("font_outline_color", Color(0.06, 0.06, 0.09))
+	title.add_theme_font_size_override("font_size", 52)
+	title.add_theme_color_override("font_outline_color", Color(0.05, 0.06, 0.09))
 	title.add_theme_constant_override("outline_size", 10)
 	title_box.add_child(title)
 
 	var sub := Label.new()
-	sub.text = "FORGE PASS!  —  听音辨拍 · 接飞铁 · 锤爆木桶"
+	sub.text = "OFFICE SLACKER!  —  听脚步切表格 · 咳声长按装加班 · 撑到18:00下班"
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.add_theme_font_size_override("font_size", 18)
-	sub.modulate = Color(0.88, 0.92, 1.0)
+	sub.add_theme_font_size_override("font_size", 17)
+	sub.modulate = Color(0.90, 0.94, 1.0)
 	title_box.add_child(sub)
 
 	var rec_lbl := Label.new()
 	rec_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	rec_lbl.add_theme_font_size_override("font_size", 18)
+	rec_lbl.add_theme_font_size_override("font_size", 17)
 	if GameState.best_rank != "":
-		var medal := "  ★完美奖章" if GameState.has_perfect_medal else ""
-		rec_lbl.text = "最佳评价：%s (%.1f%% · %d连击)%s" % [GameState.best_rank, GameState.best_accuracy, GameState.best_combo, medal]
+		var medal := "  ★摸鱼大师" if GameState.has_perfect_medal else ""
+		rec_lbl.text = "历史战绩：%s (%.1f%% · %d连击)%s" % [GameState.best_rank, GameState.best_accuracy, GameState.best_combo, medal]
 		rec_lbl.modulate = Color(1.0, 0.88, 0.35)
 	else:
-		rec_lbl.text = "操作：Space / J / 鼠标左键"
-		rec_lbl.modulate = Color(0.75, 0.80, 0.92)
+		rec_lbl.text = "操作：Space / J / 鼠标左键（闻声轻点 / 听咳按住不放）"
+		rec_lbl.modulate = Color(0.75, 0.82, 0.94)
 	title_box.add_child(rec_lbl)
 
 	var btn_row := HBoxContainer.new()
@@ -109,16 +112,16 @@ func _build_scene() -> void:
 	title_box.add_child(btn_row)
 
 	var play_btn := Button.new()
-	play_btn.text = "开始锻造 ▶"
-	play_btn.custom_minimum_size = Vector2(240, 60)
+	play_btn.text = "开始摸鱼 ▶"
+	play_btn.custom_minimum_size = Vector2(240, 58)
 	play_btn.add_theme_font_size_override("font_size", 24)
-	UITheme.style_button(play_btn, Color(1.0, 0.80, 0.24))
+	UITheme.style_button(play_btn, Color(0.35, 0.88, 0.56))
 	play_btn.pressed.connect(_start_game)
 	btn_row.add_child(play_btn)
 
 	_cal_btn = Button.new()
 	_cal_btn.text = "延迟校准 (%+d ms)" % int(GameState.audio_offset_ms)
-	_cal_btn.custom_minimum_size = Vector2(210, 60)
+	_cal_btn.custom_minimum_size = Vector2(210, 58)
 	_cal_btn.add_theme_font_size_override("font_size", 18)
 	UITheme.style_button(_cal_btn, Color(0.36, 0.78, 0.98))
 	_cal_btn.pressed.connect(_open_calibration)
@@ -128,12 +131,23 @@ func _build_scene() -> void:
 
 
 func _draw_live_backdrop() -> void:
-	ForgePainter.draw_workshop_bg(_stage_canvas, _beat_pulse, _clock, "normal", sin(_clock * 1.5) * 0.04, true, _beat_pulse * 0.4)
-	ForgePainter.draw_anvil_station(_stage_canvas, Vector2(385, 505), _beat_pulse, 0.0, false, false)
-	ForgePainter.draw_anvil_station(_stage_canvas, Vector2(885, 505), _beat_pulse, 0.0, true, false)
-	ForgePainter.draw_barrel(_stage_canvas, Vector2(1170, 560), 0.0, [{"kind": "sword", "rot": -0.1}, {"kind": "pan", "rot": 0.15}], false)
-	ForgePainter.draw_master(_stage_canvas, Vector2(210, 615), _beat_pulse, _clock, 0.0, 0.0, "normal", false)
-	ForgePainter.draw_player(_stage_canvas, Vector2(1040, 615), _beat_pulse, _clock, 0.0, 0.0, "normal", Vector2(385, 450), false)
+	var bf := _clock / TITLE_BEAT_SEC
+	var bar_pos := fmod(bf, 4.0)
+	var is_work := bar_pos >= 3.0 and bar_pos < 3.85
+	var glass_p := -1.0
+	if bar_pos < 3.0:
+		glass_p = bar_pos / 3.0
+	OfficePainter.draw_office_scene(_stage_canvas, {
+		"beat_float": bf,
+		"beat_pulse": _beat_pulse,
+		"clock": _clock,
+		"slacker_pose": "work" if is_work else "slack",
+		"slacker_bounce": _beat_pulse * 2.0,
+		"glass_progress": glass_p,
+		"boss_door_vis": 1.0 if is_work else 0.0,
+		"boss_pop": maxf(0.0, 1.0 - (bar_pos - 3.0) * 3.0) if is_work else 0.0,
+		"time_str": "17:58",
+	})
 
 
 func _build_calibration_modal() -> void:
@@ -149,7 +163,7 @@ func _build_calibration_modal() -> void:
 
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(540, 0)
-	UITheme.style_card(panel, Color(0.15, 0.16, 0.24), Color(0.36, 0.78, 0.98))
+	UITheme.style_card(panel, Color(0.14, 0.16, 0.24), Color(0.36, 0.78, 0.98))
 	cc.add_child(panel)
 
 	var vb := VBoxContainer.new()
@@ -163,13 +177,13 @@ func _build_calibration_modal() -> void:
 	vb.add_child(h)
 
 	_cal_status = Label.new()
-	_cal_status.text = "跟着稳恒鼓点按 Space 或点击下方按钮 4 次\n当前偏移：%+d ms" % int(GameState.audio_offset_ms)
+	_cal_status.text = "跟着老板脚步拍按 Space 或点击按钮 4 次\n当前偏移：%+d ms" % int(GameState.audio_offset_ms)
 	_cal_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_cal_status.add_theme_font_size_override("font_size", 18)
 	vb.add_child(_cal_status)
 
 	var tap_test_btn := Button.new()
-	tap_test_btn.text = "跟着节拍点我！(Space)"
+	tap_test_btn.text = "跟着脚步点我！(Space)"
 	tap_test_btn.custom_minimum_size = Vector2(0, 62)
 	tap_test_btn.add_theme_font_size_override("font_size", 22)
 	UITheme.style_button(tap_test_btn, Color(1.0, 0.80, 0.24))
@@ -216,9 +230,9 @@ func _close_calibration() -> void:
 func _record_cal_tap() -> void:
 	if not _cal_active:
 		return
-	var beat_pos := _cal_clock / 0.5
+	var beat_pos := _cal_clock / TITLE_BEAT_SEC
 	var nearest := roundf(beat_pos)
-	var err_ms := (_cal_clock - nearest * 0.5) * 1000.0
+	var err_ms := (_cal_clock - nearest * TITLE_BEAT_SEC) * 1000.0
 	_cal_samples.append(clampf(err_ms, -120.0, 120.0))
 	if not _is_headless:
 		_sfx_player.stream = _sfx_tap
@@ -237,12 +251,12 @@ func _record_cal_tap() -> void:
 
 func _update_cal_labels() -> void:
 	_cal_btn.text = "延迟校准 (%+d ms)" % int(GameState.audio_offset_ms)
-	_cal_status.text = "跟着木鱼鼓点按 Space 或点击按钮 (%d/4 次)\n当前偏移：%+d ms" % [_cal_samples.size(), int(GameState.audio_offset_ms)]
+	_cal_status.text = "跟着老板脚步按 Space 或点击按钮 (%d/4 次)\n当前偏移：%+d ms" % [_cal_samples.size(), int(GameState.audio_offset_ms)]
 
 
 func _start_game() -> void:
 	_bgm_player.stop()
-	get_tree().change_scene_to_file("res://scenes/stage_forge_pass.tscn")
+	get_tree().change_scene_to_file("res://scenes/stage_office.tscn")
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -259,7 +273,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if _cal_active:
 		_cal_clock += delta
-		var cb := int(floorf(_cal_clock / 0.5))
+		var cb := int(floorf(_cal_clock / TITLE_BEAT_SEC))
 		if cb > _cal_last_beat:
 			_cal_last_beat = cb
 			_beat_pulse = 1.0
@@ -268,7 +282,7 @@ func _process(delta: float) -> void:
 				_sfx_player.play()
 	else:
 		_clock += delta
-		var b := int(floorf(_clock / 0.5))
+		var b := int(floorf(_clock / TITLE_BEAT_SEC))
 		if b > _last_beat:
 			_last_beat = b
 			_beat_pulse = 1.0
